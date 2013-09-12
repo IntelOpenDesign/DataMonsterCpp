@@ -20,7 +20,18 @@ void setup() {
 int iCount = 0;
 bool bIncrementing = true;
 void loop() {
-  // put your main code here, to run repeatedly: 
+
+  /////////////////////////////////
+  // Run Main Code
+  /////////////////////////////////
+  // IF g_oSensorModule.foundPerson()
+    // [X,Y,Z] = g_oSensorModule.getPersonsLocation()
+    // g_oDataMonster.setMood(FOCUSED)
+  // ELSE
+    // [X,Y,Z] = g_oSensorModule.getNextDataPosture()
+    // g_oDataMonster.setMood(CHILLING)
+
+  // g_oDataMonster.setPosture([X,Y,Z])
 
   g_poServo->setSteps(iCount);
   delay(1000);               // wait for a second
@@ -57,6 +68,7 @@ void loop() {
     digitalWrite(g_iLed13, HIGH);   // turn the LED on (HIGH is the voltage level)
     delay(1000);               // wait for a second
     digitalWrite(g_iLed13, LOW);    // turn the LED off by making the voltage LOW
+    delay(1000);               // wait for a second
   }
 
 
