@@ -17,8 +17,7 @@ private:
   //  static const float MAX_ANGLE = PI;
   //float PWM_TO_RAD = 81.4873; // WARNING: This is an approximation assuming the mapping [0 - 255] <-> [-PI/2 - PI/2] 
 
-  float m_fPwmMin;
-  float m_fPwmMax;
+
   float m_fPwmMidPoint;
 
   float m_fAngMax;
@@ -44,18 +43,20 @@ private:
   ///////////////////////////
   // Public Members
   ///////////////////////////
-
+public:
+  float m_fPwmMin;
+  float m_fPwmMax;
 
   ///////////////////////////
   // Public methods / Interface
   ///////////////////////////
-public:
+
 
   // Constructor
   Servo(int _iPinNum) {
 
-  m_iPinNum = _iPinNum;
-  m_fPwmMidPoint = 128;
+    m_iPinNum = _iPinNum;
+    m_fPwmMidPoint = 128;
 
     // Setting up important values
     //   PWM_TO_RAD = MAX_PWM / MAX_ANGLE;
@@ -167,6 +168,7 @@ public:
 };
 
 #endif // SERVO_CPP
+
 
 
 
