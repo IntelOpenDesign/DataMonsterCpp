@@ -54,16 +54,8 @@ public:
   // Constructor
   Servo(int _iPinNum) {
 
-  m_iPinNum = 0;
-
-  m_fPwmMin = -1;
-  m_fPwmMax = -1;
+  m_iPinNum = _iPinNum;
   m_fPwmMidPoint = 128;
-
-  m_fAngMax = -1;
-  m_fAngMin = -1;
-
-  m_bIsServoCalib = false;
 
     // Setting up important values
     //   PWM_TO_RAD = MAX_PWM / MAX_ANGLE;

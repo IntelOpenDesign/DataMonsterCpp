@@ -36,7 +36,7 @@ public:
   ///////////////////////////
   // Public methods / Interface
   ///////////////////////////
-  DataMonster(int iSerialPort) {  
+  DataMonster() {  
     // Setting up interface with Ardtruino board 
     Serial.println("Print List:");
 
@@ -56,14 +56,19 @@ public:
     //m_sFileNameFullPath = dataPath(m_sFileName);
     //m_oCalibFile = createReader(m_sFileName);   
 
-    // Calibrate the robot joints
-    /*
-    m_apJoinArray[0].setPwmLimits(65, 160);
-     m_apJoinArray[1].setPwmLimits(113, 175);
-     m_apJoinArray[2].setPwmLimits(113, 175);
-     m_apJoinArray[3].setPwmLimits(55, 150);
-     m_apJoinArray[4].setPwmLimits(55, 175);
-     */
+    // Calibrate the robot joints  
+//    m_apJoinArray[0]->setPwmLimits(65, 160);
+//     m_apJoinArray[1]->setPwmLimits(113, 175);
+//     m_apJoinArray[2]->setPwmLimits(113, 175);
+//     m_apJoinArray[3]->setPwmLimits(55, 150);
+//     m_apJoinArray[4]->setPwmLimits(55, 175);
+     
+     m_apJoinArray[0]->setPwmLimits(55, 245);
+     m_apJoinArray[1]->setPwmLimits(0, 255);
+     m_apJoinArray[2]->setPwmLimits(10, 255);
+     m_apJoinArray[3]->setPwmLimits(55, 240);
+     m_apJoinArray[4]->setPwmLimits(60, 228);
+     
   }
 
   // Check if all the joint servos are calibrted
