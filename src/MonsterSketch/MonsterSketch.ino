@@ -13,7 +13,10 @@ void setup() {
 
   // Setup Servos
   g_poServo = new Servo(3);
-  g_poServo->setPwmLimits(65, 160);
+  g_poServo->setPwmLimits(0, 255);
+  
+  // 
+  Serial.begin(9600);
 
 }
 
@@ -34,7 +37,8 @@ void loop() {
   // g_oDataMonster.setPosture([X,Y,Z])
 
   g_poServo->setSteps(iCount);
-  delay(1000);               // wait for a second
+  //delay(1000);               // wait for a second
+  Serial.println(iCount);
 
   if(bIncrementing)
   {
@@ -57,7 +61,7 @@ void loop() {
 
 
   // Indicate we are hitting the Loop() function
-  blinkPin13();
+  //blinkPin13();
 
 
 }

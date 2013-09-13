@@ -9,7 +9,7 @@ class Servo {
   // Private Members
   ///////////////////////////
 private:
-  int m_iPinNum = 0;
+  int m_iPinNum ;
 
   //  static const int MIN_PWM = 0;
   //  static const int MAX_PWM = 255;
@@ -17,14 +17,14 @@ private:
   //  static const float MAX_ANGLE = PI;
   //float PWM_TO_RAD = 81.4873; // WARNING: This is an approximation assuming the mapping [0 - 255] <-> [-PI/2 - PI/2] 
 
-  float m_fPwmMin = -1;
-  float m_fPwmMax = -1;
-  float m_fPwmMidPoint = 128;
+  float m_fPwmMin;
+  float m_fPwmMax;
+  float m_fPwmMidPoint;
 
-  float m_fAngMax = -1;
-  float m_fAngMin = -1;
+  float m_fAngMax;
+  float m_fAngMin;
 
-  bool m_bIsServoCalib = false;
+  bool m_bIsServoCalib;
 
   ///////////////////////////
   // Private Methods
@@ -32,7 +32,7 @@ private:
 
   // Set the PWM percent
   // [0 - 255] -> [0% - 100%] 
-  void setPwm(int _iPwmVal) {
+  void setPwm(int _iPwmVal) { 
     if ( MIN_PWM <= _iPwmVal && _iPwmVal <= MAX_PWM) {
       analogWrite(m_iPinNum, _iPwmVal);
     }
@@ -54,7 +54,16 @@ public:
   // Constructor
   Servo(int _iPinNum) {
 
+  m_iPinNum = 0;
 
+  m_fPwmMin = -1;
+  m_fPwmMax = -1;
+  m_fPwmMidPoint = 128;
+
+  m_fAngMax = -1;
+  m_fAngMin = -1;
+
+  m_bIsServoCalib = false;
 
     // Setting up important values
     //   PWM_TO_RAD = MAX_PWM / MAX_ANGLE;
