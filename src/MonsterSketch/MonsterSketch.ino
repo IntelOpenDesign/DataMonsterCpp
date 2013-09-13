@@ -1,5 +1,6 @@
 //#include "Servo.cpp"g_oDataMonster
 #include "DataMonster.cpp"
+#include "SensorModule.cpp"
 
 // Function Signatures
 void getSerialCommand();
@@ -8,6 +9,7 @@ void getPersonsLocation(float& _fX, float& _fY, float& _fZ);
 // Globals
 //Servo* g_poServo;
 DataMonster* g_poDataMonster;
+SensorModule* g_poMySensorModule;
 
 int g_iPwmValue = 128;
 bool g_bSettingLowLimit = true;
@@ -38,13 +40,15 @@ void setup() {
   pinMode(g_iLed13, OUTPUT);     
 
   // Generate rand numbers
-//  oRandNumGen = new Random();
+  //  oRandNumGen = new Random();
 
   // Setup Servos
   //  g_poServo = new Servo(3);
   //  g_poServo->setPwmLimits(0, 255);
 
   g_poDataMonster = new DataMonster();
+
+  g_poMySensorModule = new SensorModule();
 
   //Initialize serial and wait for port to open:
   Serial.begin(9600); 
@@ -79,16 +83,21 @@ void loop() {
   //    g_poDataMonster->setPosture();
 
   // IF g_oSensorModule.foundPerson()
-
-  getPersonsLocation(g_fX,g_fY,g_fZ);
+  g_poMySensorModule->update(); // getPersonsLocation(g_fX,g_fY,g_fZ);
   // g_poDataMonster->setMood(FOCUSED)
   // ELSE
   // [X,Y,Z] = g_oSensorModule.getNextDataPosture()
   // g_poDataMonster->setMood(CHILLING)
-  g_poDataMonster->setPosture(g_fX,g_fY,g_fZ);
-    Serial.print("X: ");Serial.print(g_fX);
-    Serial.print("Y: ");Serial.print(g_fY);
-    Serial.print("Z: ");Serial.print(g_fZ);
+  g_fX = g_poMySensorModule->location[0];
+  g_fY = g_poMySensorModule->location[1];
+  g_fZ = g_poMySensorModule->location[2];
+  g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ);
+  Serial.print("X: ");
+  Serial.print(g_fX);
+  Serial.print(" Y: ");
+  Serial.print(g_fY);
+  Serial.print(" Z: ");
+  Serial.println(g_fZ);
 
 
   //////////////
@@ -102,7 +111,7 @@ void loop() {
   // else
   //  {
   // Control Robot
-//  controlRobot();
+  //  controlRobot();
   //  }
 
 }
@@ -300,6 +309,7 @@ void blinkPin13()
   digitalWrite(g_iLed13, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);               // wait for a second
 }
+
 
 
 
