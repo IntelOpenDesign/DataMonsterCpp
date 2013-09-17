@@ -91,12 +91,14 @@ void loop() {
   
   g_poMySensorModule->getLocation(g_fX,g_fY,g_fZ);
   g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ);
-  Serial.print("X: ");
-  Serial.print(g_fX);
-  Serial.print(" Y: ");
-  Serial.print(g_fY);
-  Serial.print(" Z: ");
-  Serial.println(g_fZ);
+ Serial.print(g_fX, DEC);
+  Serial.print(",");
+  delay(1);
+  Serial.print(g_fY, DEC);
+  Serial.print(",");
+  delay(1);
+  Serial.print(g_fZ, DEC);
+  Serial.println();
 
 
   //////////////
