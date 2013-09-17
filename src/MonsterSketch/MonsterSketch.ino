@@ -88,9 +88,8 @@ void loop() {
   // ELSE
   // [X,Y,Z] = g_oSensorModule.getNextDataPosture()
   // g_poDataMonster->setMood(CHILLING)
-  g_fX = g_poMySensorModule->location[0];
-  g_fY = g_poMySensorModule->location[1];
-  g_fZ = g_poMySensorModule->location[2];
+  
+  g_poMySensorModule->getLocation(g_fX,g_fY,g_fZ);
   g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ);
   Serial.print("X: ");
   Serial.print(g_fX);

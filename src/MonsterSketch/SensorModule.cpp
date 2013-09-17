@@ -1,8 +1,9 @@
 #ifndef SENSOR_MODULE_CPP
 #define SENSOR_MODULE_CPP
 
-//#include "Arduino.h"
-#include "Includes.h"
+#include "Arduino.h"
+
+#define MAX_LOCATION 1.0 // Sensors out of bounds threshold
 
 class SensorModule{
   //trying to do this without a vector class- only need a few addition/subtraction/mult opps.
@@ -51,18 +52,32 @@ public:
     dampening = 0.9;
     //////////////////////////////////////////////////////////////////////
 
-for (int i=0; i<3; i++){
-      location[i] = 0;
-}
-for (int i=0; i<3; i++){
-      force[i] = 0;
-}
-for (int i=0; i<3; i++){
-      magnitude[i] = 0;
-}
-
-
+    for (int i=0; i<3; i++){
+      location[i] = 0.1;
+    }
+    for (int i=0; i<3; i++){
+      force[i] = 0.1;
+    }
+    for (int i=0; i<3; i++){
+      magnitude[i] = 0.1;
+    }
     //feed in moods, etc
+  }
+  void getLocation(float& _fX, float& _fY, float& _fZ)
+  {
+    _fX = 0;
+    _fY = 0;
+    _fZ = 0;
+
+    if( -MAX_LOCATION <= location[0] || location[0] <= MAX_LOCATION)
+      _fX = location[0];
+
+    if( -MAX_LOCATION <= location[1] || location[1] <= MAX_LOCATION)
+      _fY = location[1];     
+
+    if( -MAX_LOCATION <= location[2] || location[2] <= MAX_LOCATION)
+      _fZ = location[2];
+
   }
 
   void update(){
@@ -72,9 +87,10 @@ for (int i=0; i<3; i++){
     //delay(100);
     sensorUP = analogRead(A2);
     //delay(100);
-    left = map( sensorL, 0, 1023, 0, -1000);
-    right = map( sensorR, 0, 1023, 0, 1000);
-    up = map( sensorUP, 0, 1023, 0, 1000);
+    ///////////////////////////////////////////Sensor Calibration Adjustments
+    left = map( sensorL, 0, 700, 0, 1000);
+    right = map( sensorR, 0, 700, 0, -1000);
+    up = map( sensorUP, 0, 700, 0, 1000);
 
     //set x, y, and z values for lxyz
     lxyz[0] = (sin(PI/4)*(left/1000)); 
@@ -84,19 +100,32 @@ for (int i=0; i<3; i++){
     //set x, y, and z values for rxyz
     rxyz[0] = (sin(PI/4)*(right/1000)); 
     rxyz[1] = (0);
-    rxyz[2] = (cos(PI/4)*(right/1000));
+    rxyz[2] = (cos(PI/4)*(right/-1000));
 
     //set x, y, and z values for upxyz
-    rxyz[0] = (0); 
-    rxyz[1] = (sin(PI/4)*(up/1000));
-    rxyz[2] = (cos(PI/4)*(up/1000));
+    upxyz[0] = (0); 
+    upxyz[1] = (sin(PI/4)*(up/1000));
+    upxyz[2] = (cos(PI/4)*(up/1000));
 
-    for (int i=0; i<3; i++){
-      target[i] =  (lxyz[i] + rxyz[i] + upxyz[i]);
+
+    target[0] =  (lxyz[0] + rxyz[0] + upxyz[0]);
+    target[1] = (upxyz[1]);
+
+    /////  in Z space, we have three contributors, we want to take the largest value of the three.
+    if (lxyz[2] > rxyz[2] && lxyz[2] > upxyz[2]){
+      target[2] = lxyz[2];
     }
+    else if (rxyz[2] > upxyz[2]){
+      target[2] = rxyz[2];
+    }
+    else {
+      target[2] = upxyz[2];
+    }
+
+
     /////////////////////////////////////////////////////////Spring and Dampening code///////////////////////////////////
     for (int i=0; i<3; i++){
-      magnitude[i] = target[i]-location[i];
+      magnitude[i] = target[i] - location[i];
     }  
     for (int i=0; i<3; i++){
       force[i] = (magnitude[i] * springValue);
@@ -113,5 +142,7 @@ for (int i=0; i<3; i++){
 };
 
 #endif // SENSOR_MODULE_CPP
+
+
 
 
