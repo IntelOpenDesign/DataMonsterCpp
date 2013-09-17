@@ -14,12 +14,12 @@
 #define JOINT_4_PIN 10
 
 // Sensor limits
-#define SENSOR_X_MIN -0.707
-#define SENSOR_X_MAX 0.707
+#define SENSOR_X_MIN -0.6
+#define SENSOR_X_MAX 0.6
 #define SENSOR_Y_MIN 0.0
-#define SENSOR_Y_MAX 0.707
+#define SENSOR_Y_MAX 0.6
 #define SENSOR_Z_MIN 0.0
-#define SENSOR_Z_MAX 0.707
+#define SENSOR_Z_MAX 0.6
 
 // Us this flag for development
 //#define IS_ARDUINO_BOARD

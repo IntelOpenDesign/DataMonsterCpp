@@ -87,17 +87,17 @@ public:
     
     // X maps to joint 0
     iJoint = 0;
-    iPwmValue = mapfloat(_fX, SENSOR_X_MIN, SENSOR_X_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMin);
+    iPwmValue = mapfloat(_fX, SENSOR_X_MIN, SENSOR_X_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMax);
     moveJoint(iJoint, iPwmValue);
 
     // Y maps to the head for now
     iJoint = 3;
-    iPwmValue = mapfloat(_fY, SENSOR_Y_MIN, SENSOR_Y_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMin);
+    iPwmValue = mapfloat(_fY, SENSOR_Y_MIN, SENSOR_Y_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMax);
     moveJoint(iJoint, iPwmValue);
 
     // Z maps to the head for now
     iJoint = 4;
-    iPwmValue = mapfloat(_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMin);
+    iPwmValue = mapfloat(_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMax);
     moveJoint(iJoint, iPwmValue);
   }
 
