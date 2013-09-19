@@ -18,9 +18,15 @@ bool g_bSettingLowLimit = true;
 int g_iJointSelect;
 int g_iJointCounter;
 long g_iJointUpdateTimerCounter;
-int JOINT_UPDATE_TIMER_COUNTER_LIMIT = 10;
+#define JOINT_UPDATE_TIMER_COUNTER_LIMIT 10
 
 int g_iByte = 0;
+
+int iCount = 0;
+bool bIncrementing = true;
+float g_fX = 0;
+float g_fY = 0;
+float g_fZ = 0;
 
 #define UP 119 // w
 #define DOWN 115 // s
@@ -42,12 +48,8 @@ void setup() {
   // Generate rand numbers
   //  oRandNumGen = new Random();
 
-  // Setup Servos
-  //  g_poServo = new Servo(3);
-  //  g_poServo->setPwmLimits(0, 255);
-
+  // Init abstract hardware classes
   g_poDataMonster = new DataMonster();
-
   g_poMySensorModule = new SensorModule();
 
   //Initialize serial and wait for port to open:
@@ -57,49 +59,41 @@ void setup() {
   }
 
   // prints title with ending line break 
-  Serial.println("ASCII Table ~ Character Map"); 
+  Serial.println("*************************************"); 
+  Serial.println("***** Initializing Data Monster ****"); 
+  Serial.println("*************************************"); 
 
 }
 
-int iCount = 0;
-bool bIncrementing = true;
-float g_fX = 0;
-float g_fY = 0;
-float g_fZ = 0;
 void loop() {
 
-  // Check Serial for command
+  // Check Serial for command for Robot joint calibration
   getSerialCommand();
 
-  /////////////////////////////////
-  // Run Main Code
-  /////////////////////////////////
-  // IF g_oSensorModule.foundPerson()
-  // [X,Y,Z] = g_oSensorModule.getPersonsLocation()
-  // g_poDataMonster->setMood(FOCUSED)
-  // ELSE
-  // [X,Y,Z] = g_oSensorModule.getNextDataPosture()
-  // g_poDataMonster->setMood(CHILLING)
-  //    g_poDataMonster->setPosture();
+  /////////////////////////////////////////////
+  // Get External Stimulus
+  /////////////////////////////////////////////
 
-  // IF g_oSensorModule.foundPerson()
-  g_poMySensorModule->update(); // getPersonsLocation(g_fX,g_fY,g_fZ);
-  // g_poDataMonster->setMood(FOCUSED)
-  // ELSE
-  // [X,Y,Z] = g_oSensorModule.getNextDataPosture()
-  // g_poDataMonster->setMood(CHILLING)
-  
+  // Get latest stimulus from Tweeter (or Button)
+  //    g_poTweeterLister->update();
+  //    g_bGotTweet = g_poTweeterLister->gotTweet(); 
+
+  /////////////////////////////////////////////
+  // Get Object Location
+  /////////////////////////////////////////////
+
+  // Get latest data from sensor module
+  g_poMySensorModule->update();
+  // Get the object's location
   g_poMySensorModule->getLocation(g_fX,g_fY,g_fZ);
-  g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ);
- Serial.print(g_poMySensorModule->location[0], DEC);
-  Serial.print(",");
-  delay(1);
-  Serial.print(g_fY, DEC);
-  Serial.print(",");
-  delay(1);
-  Serial.print(g_fZ, DEC);
-  Serial.println();
 
+  /////////////////////////////////////////////
+  // Set Robot
+  /////////////////////////////////////////////
+
+  // Orient the robot towards the object
+  g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ);
+  //g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ, g_bGotTweet);
 
   //////////////
   // Check if Robot is calibrated  
@@ -310,6 +304,8 @@ void blinkPin13()
   digitalWrite(g_iLed13, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);               // wait for a second
 }
+
+
 
 
 
