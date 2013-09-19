@@ -85,7 +85,8 @@ public:
     int iPwmValue = 0;
     int iJoint = 0;
     
-    // X maps to joint 0
+      
+   // X maps to joint 0
     iJoint = 0;
     iPwmValue = mapfloat(_fX, SENSOR_X_MIN, SENSOR_X_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMax);
     moveJoint(iJoint, iPwmValue);
@@ -99,6 +100,8 @@ public:
     iJoint = 4;
     iPwmValue = mapfloat(_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMax);
     moveJoint(iJoint, iPwmValue);
+
+
   }
 
 

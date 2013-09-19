@@ -108,7 +108,7 @@ public:
     upxyz[2] = (cos(PI/4)*(up/1000));
 
 
-    target[0] =  (lxyz[0] + rxyz[0] + upxyz[0]);
+    target[0] =  (lxyz[0] + rxyz[0]);
     target[1] = (upxyz[1]);
 
     /////  in Z space, we have three contributors, we want to take the largest value of the three.

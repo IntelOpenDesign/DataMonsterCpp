@@ -91,7 +91,7 @@ void loop() {
   
   g_poMySensorModule->getLocation(g_fX,g_fY,g_fZ);
   g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ);
- Serial.print(g_fX, DEC);
+ Serial.print(g_poMySensorModule->location[0], DEC);
   Serial.print(",");
   delay(1);
   Serial.print(g_fY, DEC);
@@ -102,7 +102,7 @@ void loop() {
 
 
   //////////////
-  // Check if Robot is calibrates  
+  // Check if Robot is calibrated  
   /////////////
   // if ( !g_poDataMonster->isCalibrated() )
   //  { 

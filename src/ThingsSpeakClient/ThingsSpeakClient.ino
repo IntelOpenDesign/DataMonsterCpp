@@ -47,7 +47,7 @@ void setup()
 {
   client.connect(server, 80);
   //Ethernet.begin(mac, ip, gateway, subnet);
-  WiFi.config(ip,mac,gateway, subnet);
+  WiFi.config(ip,dns,gateway, subnet);
   Serial.begin(9600);
   delay(1000);
 }
