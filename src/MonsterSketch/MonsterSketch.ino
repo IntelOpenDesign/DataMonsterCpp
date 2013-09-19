@@ -1,6 +1,7 @@
 //#include "Servo.cpp"g_oDataMonster
 #include "DataMonster.cpp"
 #include "SensorModule.cpp"
+#include "TwitterModule.cpp"
 
 // Function Signatures
 void getSerialCommand();
@@ -10,6 +11,9 @@ void getPersonsLocation(float& _fX, float& _fY, float& _fZ);
 //Servo* g_poServo;
 DataMonster* g_poDataMonster;
 SensorModule* g_poMySensorModule;
+TwitterModule* g_poTweeterListener;
+
+bool g_bGotTweet = false;
 
 int g_iPwmValue = 128;
 bool g_bSettingLowLimit = true;
@@ -51,6 +55,7 @@ void setup() {
   // Init abstract hardware classes
   g_poDataMonster = new DataMonster();
   g_poMySensorModule = new SensorModule();
+  g_poTweeterListener = new TwitterModule();
 
   //Initialize serial and wait for port to open:
   Serial.begin(9600); 
@@ -75,8 +80,8 @@ void loop() {
   /////////////////////////////////////////////
 
   // Get latest stimulus from Tweeter (or Button)
-  //    g_poTweeterLister->update();
-  //    g_bGotTweet = g_poTweeterLister->gotTweet(); 
+  g_poTweeterListener->update();
+  g_bGotTweet = g_poTweeterListener->gotTweet(); 
 
   /////////////////////////////////////////////
   // Get Object Location
