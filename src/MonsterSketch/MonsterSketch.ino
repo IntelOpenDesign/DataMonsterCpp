@@ -54,8 +54,8 @@ void setup() {
 
   // Init abstract hardware classes
   g_poDataMonster = new DataMonster();
-  g_poMySensorModule = new SensorModule();
-  g_poTweeterListener = new TwitterModule();
+  g_poMySensorModule = new SensorModule(SENSOR_MODULE_STATUS_LED_PIN);
+  g_poTweeterListener = new TwitterModule(TWITTER_MODULE_BUTTON_PIN, TWITTER_MODULE_STATUS_LED_PIN);
 
   //Initialize serial and wait for port to open:
   Serial.begin(9600); 
@@ -80,7 +80,6 @@ void loop() {
   /////////////////////////////////////////////
 
   // Get latest stimulus from Tweeter (or Button)
-  g_poTweeterListener->update();
  g_bGotTweet = g_poTweeterListener->gotTweet(); 
 
 //  Serial.println(g_bGotTweet, DEC);
@@ -99,8 +98,8 @@ void loop() {
   /////////////////////////////////////////////
 
   // Orient the robot towards the object
-  g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ);
-  //g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ, g_bGotTweet);
+  //g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ);
+  g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ, g_bGotTweet);
 
   //////////////
   // Check if Robot is calibrated  

@@ -4,7 +4,7 @@
 #include "Arduino.h"
 
 #define MAX_LOCATION 1.0 // Sensors out of bounds threshold
-#define STATUS_LED 8
+
 
 class SensorModule{
   //trying to do this without a vector class- only need a few addition/subtraction/mult opps.
@@ -43,7 +43,7 @@ private:
 
 public:
   //Constructor
-  SensorModule(){
+  SensorModule(int _iStatusLed){
     ///  will need to move these to the update loop once they're inputing values dynamically
     /////////////////////////////springValue (usually small- (0.001-.1)
     springValue = 0.01;
@@ -65,8 +65,8 @@ public:
     //feed in moods, etc
 
     // Initialize status LED
-    pinMode(STATUS_LED, OUTPUT);      // sets the digital pin as output
-    digitalWrite(STATUS_LED,LOW);
+    pinMode(_iStatusLed, OUTPUT);      // sets the digital pin as output
+    digitalWrite(_iStatusLed,LOW);
 
   }
   void getLocation(float& _fX, float& _fY, float& _fZ)

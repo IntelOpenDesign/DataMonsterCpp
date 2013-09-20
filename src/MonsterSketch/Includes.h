@@ -13,6 +13,10 @@
 #define JOINT_3_PIN 9
 #define JOINT_4_PIN 10
 
+#define SENSOR_MODULE_STATUS_LED_PIN 8
+#define TWITTER_MODULE_BUTTON_PIN 2
+#define TWITTER_MODULE_STATUS_LED_PIN 4
+
 // Sensor limits
 #define SENSOR_X_MIN -0.6
 #define SENSOR_X_MAX 0.6
