@@ -73,7 +73,7 @@ void setup() {
 void loop() {
 
   // Check Serial for command for Robot joint calibration
-  getSerialCommand();
+//  getSerialCommand();
 
   /////////////////////////////////////////////
   // Get External Stimulus
@@ -81,7 +81,9 @@ void loop() {
 
   // Get latest stimulus from Tweeter (or Button)
   g_poTweeterListener->update();
-  g_bGotTweet = g_poTweeterListener->gotTweet(); 
+ g_bGotTweet = g_poTweeterListener->gotTweet(); 
+
+//  Serial.println(g_bGotTweet, DEC);
 
   /////////////////////////////////////////////
   // Get Object Location

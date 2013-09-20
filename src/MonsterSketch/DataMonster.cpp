@@ -80,11 +80,23 @@ public:
   // _fX [ -0.707, 0.707 ]
   // _fY [ 0, 0.707 ]
   // _fZ [ 0, 0.707 ]
-  void setPosture(float _fX, float _fY, float _fZ)
+  void setPosture(float _fX, float _fY, float _fZ, bool _bGotFood)
   {
     int iPwmValue = 0;
     int iJoint = 0;
     
+    // Move head really because the robot is happy
+    if(_bGotFood)
+        happyRoutine(3);
+      
+    // Set posture
+   setPosture(_fX, _fY,_fZ);
+  }
+
+  void setPosture(float _fX, float _fY, float _fZ)
+  {
+    int iPwmValue = 0;
+    int iJoint = 0;
       
    // X maps to joint 0
     iJoint = 0;
@@ -100,11 +112,19 @@ public:
     iJoint = 4;
     iPwmValue = mapfloat(_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMax);
     moveJoint(iJoint, iPwmValue);
-
-
   }
 
-
+  void happyRoutine(int _iJoint)
+  {
+      moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin);    
+      delay(500);
+      moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMax);    
+      delay(500);
+      moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin);    
+      delay(500);
+      moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMax);    
+      delay(500);
+  }
 
   // Check if all the joint servos are calibrted
   boolean isCalibrated()

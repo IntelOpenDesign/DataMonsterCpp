@@ -94,14 +94,15 @@ public:
     sensorUP = analogRead(A2);
     //delay(100);
 
-    Serial.print(sensorL, DEC);
-    Serial.print(",");
-    delay(1);
-    Serial.print(sensorR, DEC);
-    Serial.print(",");
-    delay(1);
-    Serial.print(sensorUP, DEC);
-    Serial.println();
+
+//    Serial.print(sensorL, DEC);
+//    Serial.print(",");
+//    delay(1);
+//    Serial.print(sensorR, DEC);
+//    Serial.print(",");
+//    delay(1);
+//    Serial.print(sensorUP, DEC);
+//    Serial.println();
 
     ///////////////////////////////////////////Sensor Calibration Adjustments
     left = map( sensorL, 0, 700, 0, 1000);
