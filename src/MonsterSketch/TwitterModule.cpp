@@ -2,7 +2,12 @@
 #define TWITTER_MODULE_CPP
 
 #include "Arduino.h"
+#include "aJSON.h"
+//#include "C:\arduino-1.5.3\libraries\aJson\src\aJSON.h"
+//#include "..\..\.\libraries\aJson\src\aJSON.h"
 
+// JSON channel data
+// {"created_at":"2013-09-18T19:00:11-07:00","entry_id":5,"field1":"10"}
 
 class TwitterModule{
 
@@ -23,10 +28,13 @@ private:
   int m_iLedTime;
   int m_iLedTimeOut;
 
+  String m_sPrevTimeStamp;
+  bool m_bRecevingChars;
+
   // Methods
 
 public:
-  //Constructor
+    //Constructor
   TwitterModule(int _iButtonPin, int _iLedPin){
 
     // Initilize button
@@ -44,19 +52,62 @@ public:
     pinMode(m_iLedPin, OUTPUT); 
     digitalWrite(m_iLedPin, LOW);  
 
+    m_bRecevingChars = true;
+
   }
 
   bool gotWiFiTweet()
   {
+    bool bRet = false;
+    // Read data from the server
+    // Connect to the server
+    // Get next char from the server
 
-    return false;
+    char* sJsonPacket = "{\"created_at\":\"2013-09-18T19:00:11-07:00\",\"entry_id\":5,\"field1\":\"10\"}";
+
+
+    // Set to true when done receiving JSON packet
+    m_bRecevingChars = true;
+
+    // Process received packet
+    if( !m_bRecevingChars )
+    {
+      // Parsing JSON content and getting the creation time
+      aJsonObject* jsonObject = aJson.parse(sJsonPacket);
+      aJsonObject* oCreated_at = aJson.getObjectItem(jsonObject, "created_at"); // Can get object for "root" but not parsed "jsonObject"
+      if (oCreated_at == NULL) {
+        Serial.println("ERROR: Couldn't find JSON item: \"created_at\"");
+        return false;
+      }
+
+      // Check if we have a new Tweet
+      // IF received full message
+      String sCurTimeStamp = oCreated_at->valuestring;
+
+      // Check with previous Tweet timestamp
+      if( m_sPrevTimeStamp.compareTo(sCurTimeStamp) != 0 )  
+      {
+        //       Serial.println("GOT NEW TWEET");
+        // The Tweet is new
+        bRet = true;
+      }
+
+      // Update time stamp
+      m_sPrevTimeStamp = sCurTimeStamp;
+
+      // Start listening for new JSON packets
+      m_bRecevingChars = true;
+    }
+
+    return bRet;
   }
 
   bool gotTweet()
   {
 
     // Check if we received a Tweet from the web or the physical button
-    bool bGotTweet = gotButtonTweet() || gotWiFiTweet();
+    bool bGotWiFiTweet = gotWiFiTweet();
+    bool bGotTweet = gotButtonTweet() || bGotWiFiTweet;
     updateTweetLed(bGotTweet);
 
     return bGotTweet;
@@ -107,6 +158,12 @@ private:
 };
 
 #endif // TWITTER_MODULE_CPP
+
+
+
+
+
+
 
 
 
