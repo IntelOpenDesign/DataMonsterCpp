@@ -1,13 +1,35 @@
 #ifndef INCLUDES_H
 #define INCLUDES_H
 
+// ***************************************
+// Specify which Robot we are programming
+// ***************************************
+
+#define ROBOT_1
+//#define ROBOT_2
+
+// ***************************************
+// Specify which Robot we are programming
+// ***************************************
+#define CALIBRATING
+
+
+//////////////////////////////////////////
 #define MIN_PWM 0
 #define MAX_PWM 255
 
 #define TOTAL_NUM_JOINTS 5
 
   // Arduino pin assignments
+
+#ifdef ROBOT_1
+#define JOINT_0_PIN 11
+#endif
+
+#ifdef ROBOT_2
 #define JOINT_0_PIN 3
+#endif
+
 #define JOINT_1_PIN 5
 #define JOINT_2_PIN 6
 #define JOINT_3_PIN 9

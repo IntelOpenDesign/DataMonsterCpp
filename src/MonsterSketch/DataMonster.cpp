@@ -67,11 +67,27 @@ public:
     //     m_apJoinArray[3]->setPwmLimits(55, 150);
     //     m_apJoinArray[4]->setPwmLimits(55, 175);
 
+//    m_apJoinArray[0]->setPwmLimits(55, 245);
+//    m_apJoinArray[1]->setPwmLimits(0, 255);
+//    m_apJoinArray[2]->setPwmLimits(10, 255);
+//    m_apJoinArray[3]->setPwmLimits(55, 240);
+//    m_apJoinArray[4]->setPwmLimits(60, 228);
+
+#ifdef ROBOT_1
+    m_apJoinArray[0]->setPwmLimits(55, 235);
+    m_apJoinArray[1]->setPwmLimits(70, 200);
+    m_apJoinArray[2]->setPwmLimits(60, 230);
+    m_apJoinArray[3]->setPwmLimits(80, 200);
+    m_apJoinArray[4]->setPwmLimits(70, 200);
+#endif
+
+#ifdef ROBOT_2
     m_apJoinArray[0]->setPwmLimits(55, 245);
     m_apJoinArray[1]->setPwmLimits(0, 255);
     m_apJoinArray[2]->setPwmLimits(10, 255);
     m_apJoinArray[3]->setPwmLimits(55, 240);
     m_apJoinArray[4]->setPwmLimits(60, 228);
+#endif
 
   }
 

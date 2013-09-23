@@ -72,17 +72,36 @@ void setup() {
 
 void loop() {
 
+  // RUN JOINT CALIBRATION ROUTINE
+#ifdef CALIBRATING 
+
   // Check Serial for command for Robot joint calibration
-//  getSerialCommand();
+ getSerialCommand();
+
+  //////////////
+  // Check if Robot is calibrated  
+  /////////////
+//    if ( !g_poDataMonster->isCalibrated() )
+//    { 
+    // Calibrate Robot
+    calibRobot();
+//  }
+//  else
+//  {
+//    // Control Robot
+//    controlRobot();
+//  }
+
+#else // RUN ROBOT PROGRAM
 
   /////////////////////////////////////////////
   // Get External Stimulus
   /////////////////////////////////////////////
 
   // Get latest stimulus from Tweeter (or Button)
- g_bGotTweet = g_poTweeterListener->gotTweet(); 
+  g_bGotTweet = g_poTweeterListener->gotTweet(); 
 
-//  Serial.println(g_bGotTweet, DEC);
+  //  Serial.println(g_bGotTweet, DEC);
 
   /////////////////////////////////////////////
   // Get Object Location
@@ -101,27 +120,8 @@ void loop() {
   //g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ);
   g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ, g_bGotTweet);
 
-  //////////////
-  // Check if Robot is calibrated  
-  /////////////
-  // if ( !g_poDataMonster->isCalibrated() )
-  //  { 
-  // Calibrate Robot
-  //  calibRobot();
-  //  }
-  // else
-  //  {
-  // Control Robot
-  //  controlRobot();
-  //  }
+#endif
 
-}
-
-void getPersonsLocation(float& _fX, float& _fY, float& _fZ)
-{
-  _fX = (float)(random(SENSOR_X_MIN*1000,SENSOR_X_MAX*1000)/1000.0);
-  _fY = (float)(random(SENSOR_Y_MIN*1000,SENSOR_Y_MAX*1000)/1000.0);
-  _fZ = (float)(random(SENSOR_Z_MIN*1000,SENSOR_Z_MAX*1000)/1000.0);
 }
 
 // Robot calibration interface
@@ -310,6 +310,7 @@ void blinkPin13()
   digitalWrite(g_iLed13, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);               // wait for a second
 }
+
 
 
 
