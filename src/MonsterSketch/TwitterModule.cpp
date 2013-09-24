@@ -71,11 +71,12 @@ public:
     if( _sJsonString.length() <= 0 || JSON_BUFFER_SIZE < _sJsonString.length())
       return bRet;
       
-     // Format the string to parse it
-    _sJsonString.toCharArray(m_cJsonPacket,_sJsonString.length());
+     // Format the string to parse it (WE ARE ADDING +1 characters below. This can cause a problem if we receive more than BUFFER allows)
+    _sJsonString.toCharArray(m_cJsonPacket,_sJsonString.length()+1);
 
     // Parsing JSON content and getting the creation time
     aJsonObject* jsonObject = aJson.parse(m_cJsonPacket);
+ //   Serial.println(m_cJsonPacket);
     aJsonObject* oCreated_at = aJson.getObjectItem(jsonObject, "created_at"); // Can get object for "root" but not parsed "jsonObject"
     if (oCreated_at == NULL) {
       Serial.println("ERROR: Couldn't find JSON item: \"created_at\"");
@@ -83,10 +84,12 @@ public:
     }
 
     // Check if we have a new Tweet. Compare current with previous datapoint time stamp.
-    String sCurTimeStamp = oCreated_at->valuestring;
+    String sCurTimeStamp(oCreated_at->valuestring);
+    
+  //  String sCurTimeStamp = "";
     if( m_sPrevTimeStamp.compareTo(sCurTimeStamp) != 0 )  // 0 == Strings are the same
     {
-      //       Serial.println("GOT NEW TWEET");
+      Serial.println("GOT NEW TWEET");
       // The Tweet is new
       bRet = true;
     }

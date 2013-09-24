@@ -123,7 +123,7 @@ void loop() {
 
   // Get latest stimulus from Twitter (or Button)
   String sServerString = checkTwitter();
- // g_bGotTweet = g_poTweeterListener->gotTweet(sServerString); 
+ g_bGotTweet = g_poTweeterListener->gotTweet(sServerString); 
 
   /////////////////////////////////////////////
   // Get Object Location
