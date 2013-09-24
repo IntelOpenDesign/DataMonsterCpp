@@ -1,10 +1,11 @@
 #ifndef TWITTER_MODULE_CPP
 #define TWITTER_MODULE_CPP
 
-#include "Arduino.h"
+#include "Includes.h"
 #include "aJSON.h"
-//#include "C:\arduino-1.5.3\libraries\aJson\src\aJSON.h"
-//#include "..\..\.\libraries\aJson\src\aJSON.h"
+//#include "Ethernet.h"
+//#include "WiFi.h"
+
 
 // JSON channel data
 // {"created_at":"2013-09-18T19:00:11-07:00","entry_id":5,"field1":"10"}
@@ -31,11 +32,14 @@ private:
   String m_sPrevTimeStamp;
   bool m_bRecevingChars;
 
+  int m_iNetworkStatusLedPin;
+  char m_cJsonPacket[JSON_BUFFER_SIZE];
+
   // Methods
 
 public:
-    //Constructor
-  TwitterModule(int _iButtonPin, int _iLedPin){
+  //Constructor
+  TwitterModule(int _iButtonPin, int _iLedPin, int _iNetLedPin){
 
     // Initilize button
     m_iButtonReading = LOW;
@@ -54,60 +58,54 @@ public:
 
     m_bRecevingChars = true;
 
+    // Initialize WiFi
+    m_iNetworkStatusLedPin = _iNetLedPin;
+    pinMode(m_iNetworkStatusLedPin, OUTPUT); 
+    digitalWrite(m_iNetworkStatusLedPin, LOW);  
   }
 
-  bool gotWiFiTweet()
+  bool gotStringTweet(String _sJsonString)
   {
     bool bRet = false;
-    // Read data from the server
-    // Connect to the server
-    // Get next char from the server
+    
+    if( _sJsonString.length() <= 0 || JSON_BUFFER_SIZE < _sJsonString.length())
+      return bRet;
+      
+     // Format the string to parse it
+    _sJsonString.toCharArray(m_cJsonPacket,_sJsonString.length());
 
-    char* sJsonPacket = "{\"created_at\":\"2013-09-18T19:00:11-07:00\",\"entry_id\":5,\"field1\":\"10\"}";
-
-
-    // Set to true when done receiving JSON packet
-    m_bRecevingChars = true;
-
-    // Process received packet
-    if( !m_bRecevingChars )
-    {
-      // Parsing JSON content and getting the creation time
-      aJsonObject* jsonObject = aJson.parse(sJsonPacket);
-      aJsonObject* oCreated_at = aJson.getObjectItem(jsonObject, "created_at"); // Can get object for "root" but not parsed "jsonObject"
-      if (oCreated_at == NULL) {
-        Serial.println("ERROR: Couldn't find JSON item: \"created_at\"");
-        return false;
-      }
-
-      // Check if we have a new Tweet
-      // IF received full message
-      String sCurTimeStamp = oCreated_at->valuestring;
-
-      // Check with previous Tweet timestamp
-      if( m_sPrevTimeStamp.compareTo(sCurTimeStamp) != 0 )  
-      {
-        //       Serial.println("GOT NEW TWEET");
-        // The Tweet is new
-        bRet = true;
-      }
-
-      // Update time stamp
-      m_sPrevTimeStamp = sCurTimeStamp;
-
-      // Start listening for new JSON packets
-      m_bRecevingChars = true;
+    // Parsing JSON content and getting the creation time
+    aJsonObject* jsonObject = aJson.parse(m_cJsonPacket);
+    aJsonObject* oCreated_at = aJson.getObjectItem(jsonObject, "created_at"); // Can get object for "root" but not parsed "jsonObject"
+    if (oCreated_at == NULL) {
+      Serial.println("ERROR: Couldn't find JSON item: \"created_at\"");
+      return false;
     }
+
+    // Check if we have a new Tweet. Compare current with previous datapoint time stamp.
+    String sCurTimeStamp = oCreated_at->valuestring;
+    if( m_sPrevTimeStamp.compareTo(sCurTimeStamp) != 0 )  // 0 == Strings are the same
+    {
+      //       Serial.println("GOT NEW TWEET");
+      // The Tweet is new
+      bRet = true;
+    }
+
+    // Update time stamp
+    m_sPrevTimeStamp = sCurTimeStamp;
+
+    // Start listening for new JSON packets
+    m_bRecevingChars = true;
 
     return bRet;
   }
 
-  bool gotTweet()
+  bool gotTweet(String _sJsonString)
   {
 
     // Check if we received a Tweet from the web or the physical button
-    bool bGotWiFiTweet = gotWiFiTweet();
-    bool bGotTweet = gotButtonTweet() || bGotWiFiTweet;
+    bool bGotStrTweet = gotStringTweet(_sJsonString);
+    bool bGotTweet = gotButtonTweet() || bGotStrTweet;
     updateTweetLed(bGotTweet);
 
     return bGotTweet;
@@ -158,6 +156,14 @@ private:
 };
 
 #endif // TWITTER_MODULE_CPP
+
+
+
+
+
+
+
+
 
 
 

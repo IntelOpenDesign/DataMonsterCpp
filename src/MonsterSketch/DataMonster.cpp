@@ -42,7 +42,7 @@ public:
   ///////////////////////////
   DataMonster() {  
     // Setting up interface with Ardtruino board 
-    Serial.println("Print List:");
+//    Serial.println("Print List:");
 
     //    m_apJoinArray = new Servo[TOTAL_NUM_JOINTS] ;
 
@@ -209,7 +209,7 @@ public:
     if ( 0 <= _iJointNum && _iJointNum <TOTAL_NUM_JOINTS ) {
       // Try to move the joint
       if ( m_apJoinArray[_iJointNum]->setSteps(_sSteps) ) {
-        Serial.println("ERROR: joint PWM out of bounds.\n");
+/////        Serial.println("ERROR: joint PWM out of bounds.\n"); // NEED
         return true;
       }
     }
@@ -226,6 +226,7 @@ public:
 
 
 #endif // DATAMONSTER_CPP
+
 
 
 

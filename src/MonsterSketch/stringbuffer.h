@@ -53,3 +53,4 @@ extern "C"
 }
 #endif
 #endif /* STRINGBUFFER_H_ */
+

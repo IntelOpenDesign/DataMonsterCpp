@@ -13,14 +13,27 @@
 // ***************************************
 //#define CALIBRATING
 
+//////////////////////////////////////////
+// Network Settings
+//////////////////////////////////////////
+#define NETWORK_SSID "BlackSwan_Portal"
+#define NETWORK_PASS "88288818"
 
+#define TWITTER_MODULE_STATUS_LED_PIN 7
+
+#define JSON_BUFFER_SIZE 512
+
+//#define WIFI
+
+//////////////////////////////////////////
+// Robot Macros
 //////////////////////////////////////////
 #define MIN_PWM 0
 #define MAX_PWM 255
 
 #define TOTAL_NUM_JOINTS 5
 
-  // Arduino pin assignments
+// Arduino pin assignments
 
 #ifdef ROBOT_1
 #define JOINT_0_PIN 11
@@ -35,6 +48,9 @@
 #define JOINT_3_PIN 9
 #define JOINT_4_PIN 10
 
+//////////////////////////////////////////
+// Sensor Macros
+//////////////////////////////////////////
 #define SENSOR_MODULE_STATUS_LED_PIN 8
 #define TWITTER_MODULE_BUTTON_PIN 2
 #define TWITTER_MODULE_STATUS_LED_PIN 4
@@ -47,19 +63,11 @@
 #define SENSOR_Z_MIN 0.0
 #define SENSOR_Z_MAX 0.6
 
-// Us this flag for development
-//#define IS_ARDUINO_BOARD
-
-// Tools
-//#include <Print.h>
+//////////////////////////////////////////
+// Project Incluse
+//////////////////////////////////////////
 #include "Arduino.h"
 
-
-////////////////////////
-// WE NEED analoWrite()
-//#include <wiring_analog.h>
-////////////////////////
-
-
 #endif // INCLUDES_H
+
 
