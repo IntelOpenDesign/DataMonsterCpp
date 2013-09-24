@@ -272,11 +272,14 @@ void initNetwork()
 
   // attempt a DHCP connection:
   Serial.println("Attempting to get an IP address using DHCP:");
+  Ethernet.begin(mac, ip);
+/*
   if (!Ethernet.begin(mac)) {
     // if DHCP fails, start with a hard-coded address:
     Serial.println("failed to get an IP address using DHCP, trying manually");
     Ethernet.begin(mac, ip);
   }
+  */
   Serial.print("My address:");
   Serial.println(Ethernet.localIP());
   // connect to Twitter:
