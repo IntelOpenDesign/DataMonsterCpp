@@ -68,7 +68,12 @@ public:
   {
     bool bRet = false;
     
-    if( _sJsonString.length() <= 0 || JSON_BUFFER_SIZE < _sJsonString.length())
+    // Making sure the string is not greater than the buffer
+    if( _sJsonString.length() <= 0 || JSON_BUFFER_SIZE < _sJsonString.length()+1 )
+      return bRet;
+     
+    // Making sure it is JSON
+    if( !_sJsonString.startsWith("{") || !_sJsonString.endsWith("}") )
       return bRet;
       
      // Format the string to parse it (WE ARE ADDING +1 characters below. This can cause a problem if we receive more than BUFFER allows)
@@ -76,12 +81,19 @@ public:
 
     // Parsing JSON content and getting the creation time
     aJsonObject* jsonObject = aJson.parse(m_cJsonPacket);
- //   Serial.println(m_cJsonPacket);
+    if (jsonObject == NULL) {
+      Serial.println("ERROR: Couldn't parser the JSON string.");
+      return false;
+    }
+  //  Serial.println(m_cJsonPacket);    
+
     aJsonObject* oCreated_at = aJson.getObjectItem(jsonObject, "created_at"); // Can get object for "root" but not parsed "jsonObject"
+    Serial.println(oCreated_at->valuestring);
     if (oCreated_at == NULL) {
       Serial.println("ERROR: Couldn't find JSON item: \"created_at\"");
       return false;
     }
+  //  Serial.println(oCreated_at->valuestring);
 
     // Check if we have a new Tweet. Compare current with previous datapoint time stamp.
     String sCurTimeStamp(oCreated_at->valuestring);

@@ -272,7 +272,10 @@ void initNetwork()
 
   // attempt a DHCP connection:
   Serial.println("Attempting to get an IP address using DHCP:");
-  Ethernet.begin(mac, ip);
+  if (Ethernet.begin(mac) == 0) {
+    Serial.println("Failed to configure Ethernet using DHCP");
+  }
+
 /*
   if (!Ethernet.begin(mac)) {
     // if DHCP fails, start with a hard-coded address:
