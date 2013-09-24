@@ -11,7 +11,7 @@
 // ***************************************
 // Specify which Robot we are programming
 // ***************************************
-//#define CALIBRATING
+#define CALIBRATING
 
 //////////////////////////////////////////
 // Network Settings

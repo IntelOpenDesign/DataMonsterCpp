@@ -27,11 +27,12 @@ unsigned long int g_iTwitterPollCounter = 0;
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192,168,1,20);
 char server[] = "www.thingspeak.com"; //https://www.thingspeak.com/channels/7554/field/1/last.json
-String g_sHttpRequest = "GET /channels/7554/field/1/last.json HTTP/1.0";
+//String g_sHttpRequest = "GET /channels/7554/field/1/last.json HTTP/1.0"; // Carlos' channel
+String g_sHttpRequest = "GET /channels/7556/field/1/last.json HTTP/1.0"; // Lucas' channel
 
 EthernetClient client;
 unsigned long g_iLastAttemptTime = 0;
-const unsigned long g_iRequestInterval = 60000;  // delay between requests
+const unsigned long g_iRequestInterval = 10000;  // delay between requests
 boolean g_bRequested;                   // whether you've made a request since connecting
 
 //String currentLine = "";            // string to hold the text from server
@@ -46,7 +47,7 @@ bool g_bSettingLowLimit = true;
 int g_iJointSelect;
 int g_iJointCounter;
 long g_iJointUpdateTimerCounter;
-#define JOINT_UPDATE_TIMER_COUNTER_LIMIT 10
+#define JOINT_UPDATE_TIMER_COUNTER_LIMIT 10000
 
 int g_iByte = 0;
 
@@ -104,16 +105,7 @@ void loop() {
   //////////////
   // Check if Robot is calibrated  
   /////////////
-  //    if ( !g_poDataMonster->isCalibrated() )
-  //    { 
-  // Calibrate Robot
   calibRobot();
-  //  }
-  //  else
-  //  {
-  //    // Control Robot
-  //    controlRobot();
-  //  }
 
 #else // RUN ROBOT PROGRAM
 
