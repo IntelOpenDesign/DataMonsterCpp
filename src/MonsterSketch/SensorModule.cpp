@@ -12,12 +12,8 @@ class SensorModule{
   // target and location are accessible from the main program.  
   //Location is value after dampening.  Target is the raw sensor value mapped to x,y,z space 
 public:
-  float target[3];
-  float location[3];
 
-  float dampening;
-  float springValue;
-
+float target[3];
 
   //raw sensor values- left, right and up
   float sensorL;
@@ -41,28 +37,33 @@ private:
   float magnitude[3];
 
 
+
 public:
   //Constructor
   SensorModule(int _iStatusLed){
     ///  will need to move these to the update loop once they're inputing values dynamically
     /////////////////////////////springValue (usually small- (0.001-.1)
-    springValue = 0.01;
+    //springValue = 0.01;
     /////////////////////////////////////////////////////////////////////
 
     ////////////////////////////dampening value (1= no dampening, 0 = full dampening (no movement)) Usually .9 or so.
-    dampening = 0.9;
+    //dampening = 0.9;
     //////////////////////////////////////////////////////////////////////
 
-    for (int i=0; i<3; i++){
-      location[i] = 0.1;
-    }
-    for (int i=0; i<3; i++){
-      force[i] = 0.1;
-    }
-    for (int i=0; i<3; i++){
-      magnitude[i] = 0.1;
-    }
+//    for (int i=0; i<3; i++){
+//      location[i] = 0.1;
+//    }
+//    for (int i=0; i<3; i++){
+//      force[i] = 0.1;
+//    }
+//    for (int i=0; i<3; i++){
+//      magnitude[i] = 0.1;
+//    }
     //feed in moods, etc
+
+    for (int i=0; i<3; i++){
+      target[i] = 0.1;
+    }
 
     // Initialize status LED
     pinMode(_iStatusLed, OUTPUT);      // sets the digital pin as output
@@ -75,14 +76,14 @@ public:
     _fY = 0;
     _fZ = 0;
 
-    if( -MAX_LOCATION <= location[0] || location[0] <= MAX_LOCATION)
-      _fX = location[0];
+    if( -MAX_LOCATION <= target[0] || target[0] <= MAX_LOCATION)
+      _fX = target[0];
 
-    if( -MAX_LOCATION <= location[1] || location[1] <= MAX_LOCATION)
-      _fY = location[1];     
+    if( -MAX_LOCATION <= target[1] || target[1] <= MAX_LOCATION)
+      _fY = target[1];     
 
-    if( -MAX_LOCATION <= location[2] || location[2] <= MAX_LOCATION)
-      _fZ = location[2];
+    if( -MAX_LOCATION <= target[2] || target[2] <= MAX_LOCATION)
+      _fZ = target[2];
 
   }
 
@@ -141,18 +142,18 @@ public:
 
 
     /////////////////////////////////////////////////////////Spring and Dampening code///////////////////////////////////
-    for (int i=0; i<3; i++){
-      magnitude[i] = target[i] - location[i];
-    }  
-    for (int i=0; i<3; i++){
-      force[i] = (magnitude[i] * springValue);
-    }  
-    for (int i=0; i<3; i++){
-      velocity[i] = dampening * (velocity[i] + force[i]);
-    }  
-    for (int i=0; i<3; i++){
-      location[i] = location[i] + velocity[i];
-    }  
+//    for (int i=0; i<3; i++){
+//      magnitude[i] = target[i] - location[i];
+//    }  
+//    for (int i=0; i<3; i++){
+//      force[i] = (magnitude[i] * springValue);
+//    }  
+//    for (int i=0; i<3; i++){
+//      velocity[i] = dampening * (velocity[i] + force[i]);
+//    }  
+//    for (int i=0; i<3; i++){
+//      location[i] = location[i] + velocity[i];
+//    }  
 
   }
 

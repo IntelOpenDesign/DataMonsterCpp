@@ -13,7 +13,7 @@ class DataMonster {
 
 private:
   int pinNum[];
-  Servo* m_apJoinArray[5];
+
   bool m_bIsCalib;
 
   //private static final String m_sCalibFileName = "JointCalibration.txt";
@@ -25,16 +25,18 @@ private:
   // Private Methods
   ///////////////////////////
   // http://forum.arduino.cc/index.php/topic,3922.0.html
-float mapfloat(float x, float in_min, float in_max, float out_min, float out_max)
+  float mapfloat(float x, float in_min, float in_max, float out_min, float out_max)
   {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
   }
 
 
+
+public:
   ///////////////////////////
   // Public Members
   ///////////////////////////
-public:
+  Servo* m_apJoinArray[5];
 
 
   ///////////////////////////
@@ -42,7 +44,7 @@ public:
   ///////////////////////////
   DataMonster() {  
     // Setting up interface with Ardtruino board 
-//    Serial.println("Print List:");
+    //    Serial.println("Print List:");
 
     //    m_apJoinArray = new Servo[TOTAL_NUM_JOINTS] ;
 
@@ -67,11 +69,11 @@ public:
     //     m_apJoinArray[3]->setPwmLimits(55, 150);
     //     m_apJoinArray[4]->setPwmLimits(55, 175);
 
-//    m_apJoinArray[0]->setPwmLimits(55, 245);
-//    m_apJoinArray[1]->setPwmLimits(0, 255);
-//    m_apJoinArray[2]->setPwmLimits(10, 255);
-//    m_apJoinArray[3]->setPwmLimits(55, 240);
-//    m_apJoinArray[4]->setPwmLimits(60, 228);
+    //    m_apJoinArray[0]->setPwmLimits(55, 245);
+    //    m_apJoinArray[1]->setPwmLimits(0, 255);
+    //    m_apJoinArray[2]->setPwmLimits(10, 255);
+    //    m_apJoinArray[3]->setPwmLimits(55, 240);
+    //    m_apJoinArray[4]->setPwmLimits(60, 228);
 
 #ifdef ROBOT_1
     m_apJoinArray[0]->setPwmLimits(55, 235);
@@ -82,11 +84,11 @@ public:
 #endif
 
 #ifdef ROBOT_2
-    m_apJoinArray[0]->setPwmLimits(55, 245);
-    m_apJoinArray[1]->setPwmLimits(0, 255);
-    m_apJoinArray[2]->setPwmLimits(10, 255);
-    m_apJoinArray[3]->setPwmLimits(55, 240);
-    m_apJoinArray[4]->setPwmLimits(60, 228);
+    m_apJoinArray[0]->setPwmLimits(50, 200);
+    m_apJoinArray[1]->setPwmLimits(80, 150);
+    m_apJoinArray[2]->setPwmLimits(70, 150);
+    m_apJoinArray[3]->setPwmLimits(160, 150);
+    m_apJoinArray[4]->setPwmLimits(70, 180);
 #endif
 
   }
@@ -96,50 +98,38 @@ public:
   // _fX [ -0.707, 0.707 ]
   // _fY [ 0, 0.707 ]
   // _fZ [ 0, 0.707 ]
-  void setPosture(float _fX, float _fY, float _fZ, bool _bGotFood)
+  void setPosture(float _j0, float _j1, float _j2, float _j3, float _j4, bool _bGotFood)
   {
     int iPwmValue = 0;
     int iJoint = 0;
-    
+
     // Move head really because the robot is happy
     if(_bGotFood)
-        happyRoutine(3);
-      
+      happyRoutine(3);
+
     // Set posture
-   setPosture(_fX, _fY,_fZ);
+    setPosture(_j0, _j1, _j2, _j3, _j4);
   }
 
-  void setPosture(float _fX, float _fY, float _fZ)
+  void setPosture(float _j0, float _j1, float _j2, float _j3, float _j4)
   {
-    int iPwmValue = 0;
-    int iJoint = 0;
-      
-   // X maps to joint 0
-    iJoint = 0;
-    iPwmValue = mapfloat(_fX, SENSOR_X_MIN, SENSOR_X_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMax);
-    moveJoint(iJoint, iPwmValue);
-
-    // Y maps to the head for now
-    iJoint = 3;
-    iPwmValue = mapfloat(_fY, SENSOR_Y_MIN, SENSOR_Y_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMax);
-    moveJoint(iJoint, iPwmValue);
-
-    // Z maps to the head for now
-    iJoint = 4;
-    iPwmValue = mapfloat(_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, m_apJoinArray[iJoint]->m_fPwmMin, m_apJoinArray[iJoint]->m_fPwmMax);
-    moveJoint(iJoint, iPwmValue);
+    moveJoint(0,_j0); 
+    moveJoint(1,_j1);  
+    moveJoint(2,_j2);  
+    moveJoint(3,_j3);  
+    moveJoint(4,_j4);   
   }
 
   void happyRoutine(int _iJoint)
   {
-      moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin);    
-      delay(500);
-      moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMax);    
-      delay(500);
-      moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin);    
-      delay(500);
-      moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMax);    
-      delay(500);
+    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin);    
+    delay(500);
+    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMax);    
+    delay(500);
+    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin);    
+    delay(500);
+    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMax);    
+    delay(500);
   }
 
   // Check if all the joint servos are calibrted
@@ -209,7 +199,7 @@ public:
     if ( 0 <= _iJointNum && _iJointNum <TOTAL_NUM_JOINTS ) {
       // Try to move the joint
       if ( m_apJoinArray[_iJointNum]->setSteps(_sSteps) ) {
-/////        Serial.println("ERROR: joint PWM out of bounds.\n"); // NEED
+        /////        Serial.println("ERROR: joint PWM out of bounds.\n"); // NEED
         return true;
       }
     }
@@ -226,6 +216,7 @@ public:
 
 
 #endif // DATAMONSTER_CPP
+
 
 
 

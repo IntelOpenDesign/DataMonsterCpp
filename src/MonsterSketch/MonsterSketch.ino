@@ -24,7 +24,8 @@ bool g_bGotTweet = false;
 unsigned long int g_iTwitterPollCounter = 0;
 //unsigned int g_iTwitterPollCounter = 0;
 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+byte mac[] = { 
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192,168,1,20);
 char server[] = "www.thingspeak.com"; //https://www.thingspeak.com/channels/7554/field/1/last.json
 //String g_sHttpRequest = "GET /channels/7554/field/1/last.json HTTP/1.0"; // Carlos' channel
@@ -47,7 +48,7 @@ bool g_bSettingLowLimit = true;
 int g_iJointSelect;
 int g_iJointCounter;
 long g_iJointUpdateTimerCounter;
-#define JOINT_UPDATE_TIMER_COUNTER_LIMIT 10000
+#define JOINT_UPDATE_TIMER_COUNTER_LIMIT 1000000
 
 int g_iByte = 0;
 
@@ -56,6 +57,18 @@ bool bIncrementing = true;
 float g_fX = 0;
 float g_fY = 0;
 float g_fZ = 0;
+int iPwmValue = 0;
+
+float target[5];
+float velocity[5];
+float force[5];
+float magnitude[5];
+float location[5];
+
+float dampening;
+float springValue;
+
+
 
 #define UP 119 // w
 #define DOWN 115 // s
@@ -67,6 +80,28 @@ float g_fZ = 0;
 int g_iLed13 = 13;
 
 void setup() {
+
+  ///  will need to move these to the update loop once they're inputing values dynamically
+  /////////////////////////////springValue (usually small- (0.001-.1)
+  springValue = 0.01;
+  /////////////////////////////////////////////////////////////////////
+
+  ////////////////////////////dampening value (1= no dampening, 0 = full dampening (no movement)) Usually .9 or so.
+  dampening = 0.9;
+  //////////////////////////////////////////////////////////////////////
+
+  for (int i=0; i<5; i++){
+    target[i] = 0.1;
+  }
+  for (int i=0; i<5; i++){
+    force[i] = 0.1;
+  }
+  for (int i=0; i<5; i++){
+    magnitude[i] = 0.1;
+  }
+  for (int i=0; i<5; i++){
+    location[i] = 0.1;
+  }
 
   // Blinking Led
   pinMode(g_iLed13, OUTPUT);     
@@ -115,7 +150,7 @@ void loop() {
 
   // Get latest stimulus from Twitter (or Button)
   String sServerString = checkTwitter();
- g_bGotTweet = g_poTweeterListener->gotTweet(sServerString); 
+  g_bGotTweet = g_poTweeterListener->gotTweet(sServerString); 
 
   /////////////////////////////////////////////
   // Get Object Location
@@ -129,9 +164,112 @@ void loop() {
   /////////////////////////////////////////////
   // Set Robot
   /////////////////////////////////////////////
+  //////////////////HARDCODING VALUES TO JOINTS BASED ON COMMON SENSOR VALUES BELOW////////////////////////
+  // X maps to joint 0
+  if(g_fX < -.1){
+    iPwmValue = mapfloat(g_fX, -.1, -0.6, g_poDataMonster->m_apJoinArray[0]->m_fPwmMin, g_poDataMonster->m_apJoinArray[0]->m_fPwmMin + 50);  ///////<-hardcoded!
+
+  } 
+  else if(g_fX > 0.1){
+    iPwmValue = mapfloat(g_fX, 0.1, 0.6, g_poDataMonster->m_apJoinArray[0]->m_fPwmMax , g_poDataMonster->m_apJoinArray[0]->m_fPwmMax - 50); ///////<-hardcoded!
+  }
+  else{
+    iPwmValue = mapfloat(g_fX, SENSOR_X_MIN, SENSOR_X_MAX, g_poDataMonster->m_apJoinArray[0]->m_fPwmMin, g_poDataMonster->m_apJoinArray[0]->m_fPwmMax);
+  }
+  target[0]= iPwmValue;
+
+
+  // Z maps to joint 1
+  if(g_fZ >= 0 && g_fZ < 0.1){
+    iPwmValue = mapfloat(g_fX, 0, (.1), g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax-50);  ///////<-hardcoded! 
+  }
+  else if(g_fZ >= 0.1 && g_fZ< 0.2){
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin + 50, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else if(g_fZ >= 0.2 && g_fZ< 0.3){
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin + 30, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else if(g_fZ >= 0.3 && g_fZ< 0.6){
+    iPwmValue = mapfloat(g_fZ, 0.3, 0.6, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else{
+    iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);
+  }
+  target[1]= iPwmValue;
+
+  // Z maps to joint 2
+  if(g_fZ >= 0 && g_fZ < 0.1){
+    iPwmValue = mapfloat(g_fZ, 0, (.1), g_poDataMonster->m_apJoinArray[2]->m_fPwmMin, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax-50);  ///////<-hardcoded! 
+  }
+  else if(g_fZ >= 0.1 && g_fZ< 0.2){
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin + 50, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else if(g_fZ >= 0.2 && g_fZ< 0.3){
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin + 30, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else if(g_fZ >= 0.3 && g_fZ< 0.6){
+    iPwmValue = mapfloat(g_fZ, 0.3, 0.6, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else{
+    iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax);
+
+  }
+  target[2]= iPwmValue;
+
+  // Z maps to joint 3
+  if(g_fZ >= 0 && g_fZ < 0.1){
+    iPwmValue = mapfloat(g_fZ, 0, (.1), g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);  ///////<-hardcoded! 
+  }
+  else if(g_fZ >= 0.1 && g_fZ< 0.2){
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else if(g_fZ >= 0.2 && g_fZ< 0.3){
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else if(g_fZ >= 0.3 && g_fZ< 0.6){
+    iPwmValue = mapfloat(g_fZ, 0.3, 0.6, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else{
+    iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);
+  }
+  target[3]= iPwmValue;
+
+  // Y maps to joint 4
+  if(g_fZ >= 0 && g_fZ < 0.1){
+    iPwmValue = mapfloat(g_fY, 0, (.1), g_poDataMonster->m_apJoinArray[4]->m_fPwmMin, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-50);  ///////<-hardcoded! 
+  }
+  else if(g_fZ >= 0.1 && g_fZ< 0.2){
+    iPwmValue = mapfloat(g_fY, 0.1, 0.2, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin + 50, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else if(g_fZ >= 0.2 && g_fZ< 0.3){
+    iPwmValue = mapfloat(g_fY, 0.1, 0.2, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin + 30, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else if(g_fZ >= 0.3 && g_fZ< 0.6){
+    iPwmValue = mapfloat(g_fY, 0.3, 0.6, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);  ///////<-hardcoded!
+  }
+  else{
+    iPwmValue = mapfloat(g_fY, SENSOR_X_MIN, SENSOR_X_MAX, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);
+
+  }
+  target[4]= iPwmValue;
+
+  for (int i=0; i<5; i++){
+    magnitude[i] = target[i] - location[i];
+  }  
+  for (int i=0; i<5; i++){
+    force[i] = (magnitude[i] * springValue);
+  }  
+  for (int i=0; i<5; i++){
+    velocity[i] = dampening * (velocity[i] + force[i]);
+  }  
+  for (int i=0; i<5; i++){
+    location[i] = location[i] + velocity[i];
+  }  
+
+
 
   // Orient the robot towards the object
-  g_poDataMonster->setPosture(g_fX,  g_fY,  g_fZ, g_bGotTweet);
+  g_poDataMonster->setPosture(location[0],  location[1],  location[2], location[3], location [4], g_bGotTweet);
 
 #endif
 
@@ -268,13 +406,13 @@ void initNetwork()
     Serial.println("Failed to configure Ethernet using DHCP");
   }
 
-/*
+  /*
   if (!Ethernet.begin(mac)) {
-    // if DHCP fails, start with a hard-coded address:
-    Serial.println("failed to get an IP address using DHCP, trying manually");
-    Ethernet.begin(mac, ip);
-  }
-  */
+   // if DHCP fails, start with a hard-coded address:
+   Serial.println("failed to get an IP address using DHCP, trying manually");
+   Ethernet.begin(mac, ip);
+   }
+   */
   Serial.print("My address:");
   Serial.println(Ethernet.localIP());
   // connect to Twitter:
@@ -292,7 +430,7 @@ String checkTwitter()
   g_iTwitterPollCounter++;
   //if(g_iTwitterPollCounter%TWITTER_POLLING_TIME == 0) // Check Tweeter every ~5 seconds
   //if(g_iTwitterPollCounter == TWITTER_POLLING_TIME) // Check Tweeter every ~5 seconds
-//  if( (g_iTwitterPollCounter%TWITTER_POLLING_TIME) == 0) // Check Tweeter every ~5 seconds
+  //  if( (g_iTwitterPollCounter%TWITTER_POLLING_TIME) == 0) // Check Tweeter every ~5 seconds
   {
     //g_iTwitterPollCounter = 0;
 #ifdef WIFI
@@ -302,7 +440,7 @@ String checkTwitter()
 #else
 
     sRetString = checkTwitterEthernet();
- //   Serial.println("*********************** HERE");
+    //   Serial.println("*********************** HERE");
 
 #endif
 
@@ -325,17 +463,18 @@ String checkTwitterEthernet()
       char inChar = client.read();
 
       // add incoming byte to end of line:
-    //  currentLine += inChar; 
+      //  currentLine += inChar; 
 
       // if you get a newline, clear the line:
- //     if (inChar == '\n') {
- //       currentLine = "";
- //     } 
+      //     if (inChar == '\n') {
+      //       currentLine = "";
+      //     } 
       // if the current line ends with <text>, it will
       // be followed by the tweet:
       if ( inChar == '{' ) {
         // tweet is beginning. Clear the tweet string:
-        readingJsonString = true;         g_sJsonString = "";
+        readingJsonString = true;         
+        g_sJsonString = "";
       }
       // if you're currently reading the bytes of a tweet,
       // add them to the tweet String:
@@ -392,4 +531,10 @@ String checkTwitterWiFi()
 {
 
 }
+
+float mapfloat(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 
