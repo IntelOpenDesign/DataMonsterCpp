@@ -11,7 +11,7 @@
 // ***************************************
 // Specify which Robot we are programming
 // ***************************************
-//#define CALIBRATING
+#define CALIBRATING
 
 //////////////////////////////////////////
 // Network Settings
@@ -28,8 +28,8 @@
 //////////////////////////////////////////
 // Robot Macros
 //////////////////////////////////////////
-#define MIN_PWM 0
-#define MAX_PWM 255
+#define MIN_PWM 8
+#define MAX_PWM 40
 
 #define TOTAL_NUM_JOINTS 5
 

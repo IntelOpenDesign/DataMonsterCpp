@@ -2,6 +2,7 @@
 #define SERVO_CPP
 
 #include "Includes.h"
+#include "Wire.h"
 
 class Servo {
 
@@ -33,11 +34,41 @@ private:
   // [0 - 255] -> [0% - 100%] 
   void setPwm(int _iPwmVal) { 
     if ( MIN_PWM <= _iPwmVal && _iPwmVal <= MAX_PWM) {
-      analogWrite(m_iPinNum, _iPwmVal);
+      setPwmI2C(m_iPinNum, _iPwmVal);
     }
     else {
-      analogWrite(m_iPinNum, (int)(MAX_PWM/2));
+      setPwmI2C(m_iPinNum, (int)(MAX_PWM/2));
     }
+  }
+
+  void setPwmI2C(int _iPinNum, int _iPwmVal)
+  {
+    // Select pin to write I2C commands to
+     analogWrite(_iPinNum,1);
+    
+    // Set divider to get 125Hz freq.
+    Wire.beginTransmission(0x20);
+    Wire.write(0x2C);
+    Wire.write(0x06);
+    Wire.endTransmission();
+
+    // Select programmable PWM CLK source
+    Wire.beginTransmission(0x20);
+    Wire.write(0x29);
+    Wire.write(0x04);
+    Wire.endTransmission();
+
+    // Set period register
+    Wire.beginTransmission(0x20);
+    Wire.write(0x2a);
+    Wire.write(0xff);
+    Wire.endTransmission();
+
+    // Set minimum duty cycle (31us @ 125Hz)
+    Wire.beginTransmission(0x20);
+    Wire.write(0x2b);
+    Wire.write(_iPwmVal);
+    Wire.endTransmission();
   }
 
   ///////////////////////////
@@ -65,8 +96,13 @@ public:
     //    m_fAngMax = -1;
     //   m_fAngMin = -1;
 
+    // Enable I2C to control servo
+    Wire.begin();
+
     // Assign servo pin
     setPin(_iPinNum);
+
+
 
     m_bIsServoCalib = false;
   }

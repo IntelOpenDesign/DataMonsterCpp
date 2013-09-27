@@ -4,6 +4,8 @@
 #include "TwitterModule.cpp"
 #include <Ethernet.h>
 //#include <WiFi.h>
+//#include "Includes.h"
+#include "Wire.h"
 
 // Function Signatures
 void getSerialCommand();
@@ -41,7 +43,7 @@ String g_sJsonString = "";
 boolean readingJsonString = false;       // if you're currently reading the tweet
 
 //////////////////////////////////////////
-int g_iPwmValue = 128;
+int g_iPwmValue = 5;
 bool g_bSettingLowLimit = true;
 //float g_fAngle = 0;
 //float g_fOneDegInRad = 0;
@@ -346,22 +348,22 @@ void getSerialCommand() {
     //Serial.println(g_iByte);
 
     if (g_iByte == UP) {
-      g_iPwmValue += 10;
+      g_iPwmValue += 1;
       //g_fAngle += g_fOneDegInRad;
     } 
     else if (g_iByte == DOWN) {
-      g_iPwmValue -= 10;
+      g_iPwmValue -= 1;
       //g_fAngle -= g_fOneDegInRad;
     }
     else if (g_iByte == LEFT) {
 
-      g_iPwmValue = 128;
+      g_iPwmValue = 5;
       //g_fAngle = 0;
       g_iJointCounter--;
     } 
     else if (g_iByte == RIGHT) {
 
-      g_iPwmValue = 128;
+      g_iPwmValue = 5;
       //g_fAngle = 0;
       g_iJointCounter++;
     }
