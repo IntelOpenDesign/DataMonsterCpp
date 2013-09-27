@@ -394,39 +394,43 @@ void blinkPin13()
 ///////////////////////////////
 // Network
 ///////////////////////////////
-void initNetwork()
+void initNetwork(bool _bSetWiFi)
 {
-#ifdef WIFI
-
-  // Wifi Version
-
-#else
-
-  // attempt a DHCP connection:
-  Serial.println("Attempting to get an IP address using DHCP:");
-  if (Ethernet.begin(mac) == 0) {
-    Serial.println("Failed to configure Ethernet using DHCP");
+  if(_bSetWiFi)
+  {
+  
+    // Wifi Version
   }
+  else
+  }
+    // Setup Ethernet
+    // attempt a DHCP connection:
+    Serial.println("Attempting to get an IP address using DHCP:");
+    if (Ethernet.begin(mac) == 0) {
+      Serial.println("Failed to configure Ethernet using DHCP");
+    }
 
-  /*
-  if (!Ethernet.begin(mac)) {
-   // if DHCP fails, start with a hard-coded address:
-   Serial.println("failed to get an IP address using DHCP, trying manually");
-   Ethernet.begin(mac, ip);
-   }
-   */
-  Serial.print("My address:");
-  Serial.println(Ethernet.localIP());
-  // connect to Twitter:
-  connectToServer();
+    /*
+    if (!Ethernet.begin(mac)) {
+     // if DHCP fails, start with a hard-coded address:
+     Serial.println("failed to get an IP address using DHCP, trying manually");
+     Ethernet.begin(mac, ip);
+     }
+     */
+    Serial.print("My address:");
+    Serial.println(Ethernet.localIP());
+    // connect to Twitter:
+    connectToServer(_bSetWiFi);
 
-#endif
+}
+
+//   connectToServer(_bSetWiFi);
 
   // give the network shield a second to initialize:
   delay(1000);
 }
 
-String checkTwitter()
+String checkTwitter(bool _bSetWiFi)
 {
   String sRetString = "";
   g_iTwitterPollCounter++;
@@ -435,16 +439,18 @@ String checkTwitter()
   //  if( (g_iTwitterPollCounter%TWITTER_POLLING_TIME) == 0) // Check Tweeter every ~5 seconds
   {
     //g_iTwitterPollCounter = 0;
-#ifdef WIFI
+if(_bSetWiFi)
+{
 
     sRetString = checkTwitterWiFi();
+}
+else
+{
 
-#else
 
     sRetString = checkTwitterEthernet();
     //   Serial.println("*********************** HERE");
-
-#endif
+}
 
   }
 
