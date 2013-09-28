@@ -3,7 +3,7 @@
 #include "SensorModule.cpp"
 #include "TwitterModule.cpp"
 #include <Ethernet.h>
-//#include <WiFi.h>
+#include <WiFi.h>
 //#include "Includes.h"
 #include "Wire.h"
 
@@ -19,8 +19,13 @@ TwitterModule* g_poTweeterListener;
 //////////////////////////////////////////
 // Ethernet/WiFi
 //////////////////////////////////////////
+int status = WL_IDLE_STATUS;     // the Wifi radio's status
 
+bool g_bUseWiFi = false;
 bool g_bGotTweet = false;
+
+WiFiClient g_oWiFiClient;
+EthernetClient client;
 
 #define TWITTER_POLLING_TIME 100
 unsigned long int g_iTwitterPollCounter = 0;
@@ -33,7 +38,6 @@ char server[] = "www.thingspeak.com"; //https://www.thingspeak.com/channels/7554
 //String g_sHttpRequest = "GET /channels/7554/field/1/last.json HTTP/1.0"; // Carlos' channel
 String g_sHttpRequest = "GET /channels/7556/field/1/last.json HTTP/1.0"; // Lucas' channel
 
-EthernetClient client;
 unsigned long g_iLastAttemptTime = 0;
 const unsigned long g_iRequestInterval = 10000;  // delay between requests
 boolean g_bRequested;                   // whether you've made a request since connecting
@@ -70,8 +74,6 @@ float location[5];
 float dampening;
 float springValue;
 
-
-
 #define UP 119 // w
 #define DOWN 115 // s
 #define LEFT 97 // a
@@ -105,11 +107,11 @@ void setup() {
     location[i] = 0.1;
   }
 
-  // Blinking Led
-  pinMode(g_iLed13, OUTPUT);     
-
-  // Init Ethernet/WiFi
-  initNetwork();
+  //Initialize serial and wait for port to open:
+  Serial.begin(9600); 
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for Leonardo only
+  }
 
   // Init abstract hardware classes
   g_poDataMonster = new DataMonster();
@@ -118,11 +120,12 @@ void setup() {
   TWITTER_MODULE_STATUS_LED_PIN,
   TWITTER_MODULE_STATUS_LED_PIN);
 
-  //Initialize serial and wait for port to open:
-  Serial.begin(9600); 
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
-  }
+  // Use the button to select between WiFi and Ethernet
+  if( digitalRead(TWITTER_MODULE_BUTTON_PIN) )
+    g_bUseWiFi = true;
+
+  // Init Ethernet/WiFi
+  initNetwork(g_bUseWiFi);
 
   // prints title with ending line break 
   Serial.println("*************************************"); 
@@ -151,7 +154,7 @@ void loop() {
   /////////////////////////////////////////////
 
   // Get latest stimulus from Twitter (or Button)
-  String sServerString = checkTwitter();
+  String sServerString = checkTwitter(g_bUseWiFi);
   g_bGotTweet = g_poTweeterListener->gotTweet(sServerString); 
 
   /////////////////////////////////////////////
@@ -396,13 +399,39 @@ void blinkPin13()
 ///////////////////////////////
 void initNetwork(bool _bSetWiFi)
 {
+
   if(_bSetWiFi)
   {
-  
-    // Wifi Version
+    // check for the presence of the shield:
+    if (WiFi.status() == WL_NO_SHIELD) {
+      Serial.println("WiFi shield not present"); 
+      return;
+    } 
+
+    String fv = WiFi.firmwareVersion();
+    if( fv != "1.1.0" )
+      Serial.println("Please upgrade the firmware");
+
+    // attempt to connect to Wifi network:
+    while ( status != WL_CONNECTED) { 
+      Serial.print("Attempting to connect to WPA SSID: ");
+      Serial.println(NETWORK_SSID);
+      // Connect to WPA/WPA2 network:    
+      status = WiFi.begin(NETWORK_SSID, NETWORK_PASS);
+
+      // wait 10 seconds for connection:
+      delay(10000);
+    }
+
+    // you're connected now, so print out the data:
+    Serial.print("You're connected to the network");
+//    printCurrentNet();
+//    printWifiData();
+      printWifiStatus();
+
   }
   else
-  }
+  {
     // Setup Ethernet
     // attempt a DHCP connection:
     Serial.println("Attempting to get an IP address using DHCP:");
@@ -420,16 +449,18 @@ void initNetwork(bool _bSetWiFi)
     Serial.print("My address:");
     Serial.println(Ethernet.localIP());
     // connect to Twitter:
-    connectToServer(_bSetWiFi);
-
-}
-
-//   connectToServer(_bSetWiFi);
+    //connectToServer(_bSetWiFi);
 
   // give the network shield a second to initialize:
   delay(1000);
-}
 
+  }
+
+  connectToServer(_bSetWiFi);
+
+
+}
+/*
 String checkTwitter(bool _bSetWiFi)
 {
   String sRetString = "";
@@ -437,48 +468,44 @@ String checkTwitter(bool _bSetWiFi)
   //if(g_iTwitterPollCounter%TWITTER_POLLING_TIME == 0) // Check Tweeter every ~5 seconds
   //if(g_iTwitterPollCounter == TWITTER_POLLING_TIME) // Check Tweeter every ~5 seconds
   //  if( (g_iTwitterPollCounter%TWITTER_POLLING_TIME) == 0) // Check Tweeter every ~5 seconds
+  //  {
+  //g_iTwitterPollCounter = 0;
+  if(_bSetWiFi)
   {
-    //g_iTwitterPollCounter = 0;
-if(_bSetWiFi)
-{
-
-    sRetString = checkTwitterWiFi();
-}
-else
-{
-
-
-    sRetString = checkTwitterEthernet();
-    //   Serial.println("*********************** HERE");
-}
-
+    sRetString = checkTwitterWiFi(_bSetWiFi);
   }
+  else
+  {
+    sRetString = checkTwitterEthernet(_bSetWiFi);
+    //   Serial.println("*********************** HERE");
+  }
+
+  //  }
 
   return sRetString;
 }
-
+*/
 
 // String g_sJsonString = "";
 // boolean readingJsonString = false;
 
-String checkTwitterEthernet()
+//String checkTwitterEthernet(bool _bSetWiFi)
+String checkTwitter(bool _bSetWiFi)
 {
   String sRetString = "";
 
-  if (client.connected()) {
-    if (client.available()) {
+  if (client.connected() || g_oWiFiClient.connected() ) {
+    if (client.available() || g_oWiFiClient.available() ) {
       // read incoming bytes:
-      char inChar = client.read();
+      char inChar;
+      if(_bSetWiFi)
+        inChar = g_oWiFiClient.read();
+      else
+        inChar = client.read();      
+      
+      // Debug
+      //Serial.write(inChar);
 
-      // add incoming byte to end of line:
-      //  currentLine += inChar; 
-
-      // if you get a newline, clear the line:
-      //     if (inChar == '\n') {
-      //       currentLine = "";
-      //     } 
-      // if the current line ends with <text>, it will
-      // be followed by the tweet:
       if ( inChar == '{' ) {
         // tweet is beginning. Clear the tweet string:
         readingJsonString = true;         
@@ -498,7 +525,11 @@ String checkTwitterEthernet()
           sRetString = g_sJsonString;
           Serial.println(g_sJsonString);   
           // close the connection to the server:
-          client.stop(); 
+          //client.stop(); 
+          if(_bSetWiFi)
+            g_oWiFiClient.stop();
+          else
+            client.stop(); 
         }
       }
     }   
@@ -506,36 +537,55 @@ String checkTwitterEthernet()
   else if (millis() - g_iLastAttemptTime > g_iRequestInterval) {
     // if you're not connected, and two minutes have passed since
     // your last connection, then attempt to connect again:
-    connectToServer();
+    connectToServer(_bSetWiFi);
   }
 
   return sRetString;
 }
 
-void connectToServer() {
+void connectToServer(bool _bSetWiFi) {
 
-#ifdef WIFI
+  if(_bSetWiFi)
+  {
 
-  // WiFi Version
-
-#else
-
-  // attempt to connect, and wait a millisecond:
-  Serial.println("connecting to server...");
-  if (client.connect(server, 80)) {
-    Serial.println("making HTTP request...");
-    // make HTTP GET request to twitter:
-    client.println(g_sHttpRequest); // ThingsSpeak
-    client.println();
+    // WiFi Version
+    Serial.println("WiFi Starting connection to server...");
+    // if you get a connection, report back via serial:
+    if (g_oWiFiClient.connect(server, 80)) {
+      Serial.println("WiFi connected to server");
+      // Make a HTTP request:
+      g_oWiFiClient.println(g_sHttpRequest); // ThingsSpeak
+      g_oWiFiClient.println();
+    }
+    else
+    {
+        Serial.println("WiFi NOT connected to server"); 
+    }
   }
+  else
+  {
 
-#endif
+    // attempt to connect, and wait a millisecond:
+    Serial.println("Ethernet connecting to server...");
+    if (client.connect(server, 80)) {
+      Serial.println("making HTTP request...");
+      // make HTTP GET request to twitter:
+      client.println(g_sHttpRequest); // ThingsSpeak
+      client.println();
+    }
+    else
+    {
+        Serial.println("Ethernet NOT connected to server"); 
+    }
+  }
+  //#endif
 
   // note the time of this connect attempt:
   g_iLastAttemptTime = millis();
-}   
 
-String checkTwitterWiFi()
+}
+
+String checkTwitterWiFi(bool _bSetWiFi)
 {
 
 }
@@ -544,5 +594,82 @@ float mapfloat(float x, float in_min, float in_max, float out_min, float out_max
 {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
+
+//////////////////// WIFI ///////////////////////////////////
+void printWifiData() {
+  // print your WiFi shield's IP address:
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
+  Serial.println(ip);
+
+  // print your MAC address:
+  byte mac[6];  
+  WiFi.macAddress(mac);
+  Serial.print("MAC address: ");
+  Serial.print(mac[5],HEX);
+  Serial.print(":");
+  Serial.print(mac[4],HEX);
+  Serial.print(":");
+  Serial.print(mac[3],HEX);
+  Serial.print(":");
+  Serial.print(mac[2],HEX);
+  Serial.print(":");
+  Serial.print(mac[1],HEX);
+  Serial.print(":");
+  Serial.println(mac[0],HEX);
+
+}
+
+void printCurrentNet() {
+  // print the SSID of the network you're attached to:
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+
+  // print the MAC address of the router you're attached to:
+  byte bssid[6];
+  WiFi.BSSID(bssid);    
+  Serial.print("BSSID: ");
+  Serial.print(bssid[5],HEX);
+  Serial.print(":");
+  Serial.print(bssid[4],HEX);
+  Serial.print(":");
+  Serial.print(bssid[3],HEX);
+  Serial.print(":");
+  Serial.print(bssid[2],HEX);
+  Serial.print(":");
+  Serial.print(bssid[1],HEX);
+  Serial.print(":");
+  Serial.println(bssid[0],HEX);
+
+  // print the received signal strength:
+  long rssi = WiFi.RSSI();
+  Serial.print("signal strength (RSSI):");
+  Serial.println(rssi);
+
+  // print the encryption type:
+  byte encryption = WiFi.encryptionType();
+  Serial.print("Encryption Type:");
+  Serial.println(encryption,HEX);
+  Serial.println();
+}
+
+void printWifiStatus() {
+  // print the SSID of the network you're attached to:
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+
+  // print your WiFi shield's IP address:
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
+
+  // print the received signal strength:
+  long rssi = WiFi.RSSI();
+  Serial.print("signal strength (RSSI):");
+  Serial.print(rssi);
+  Serial.println(" dBm");
+}
+
 
 

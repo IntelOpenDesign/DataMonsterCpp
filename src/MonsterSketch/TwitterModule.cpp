@@ -101,7 +101,7 @@ public:
   //  String sCurTimeStamp = "";
     if( m_sPrevTimeStamp.compareTo(sCurTimeStamp) != 0 )  // 0 == Strings are the same
     {
-      Serial.println("GOT NEW TWEET");
+      Serial.println("GOT WEB TWEET");
       // The Tweet is new
       bRet = true;
     }
@@ -137,6 +137,8 @@ private:
     // the time
     if (m_iButtonReading == HIGH && m_iPrevButtonReading == LOW && millis() - m_fButtonTime > m_fDebounce) 
     {
+     Serial.println("GOT BUTTON TWEET");
+      
       // Get debounce time
       m_fButtonTime = millis();    
 
