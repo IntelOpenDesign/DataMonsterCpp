@@ -76,19 +76,19 @@ public:
     //    m_apJoinArray[4]->setPwmLimits(60, 228);
 
 #ifdef ROBOT_1
-    m_apJoinArray[0]->setPwmLimits(MIN_PWM, MAX_PWM);
-    m_apJoinArray[1]->setPwmLimits(MIN_PWM, MAX_PWM);
-    m_apJoinArray[2]->setPwmLimits(MIN_PWM, MAX_PWM);
-    m_apJoinArray[3]->setPwmLimits(MIN_PWM, MAX_PWM);
-    m_apJoinArray[4]->setPwmLimits(MIN_PWM, MAX_PWM);
+    m_apJoinArray[0]->setPwmLimits(10, 33);
+    m_apJoinArray[1]->setPwmLimits(18, 31);
+    m_apJoinArray[2]->setPwmLimits(8, 27);
+    m_apJoinArray[3]->setPwmLimits(11, 37);
+    m_apJoinArray[4]->setPwmLimits(10, 35);
 #endif
 
 #ifdef ROBOT_2
-    m_apJoinArray[0]->setPwmLimits(MIN_PWM, MAX_PWM);
-    m_apJoinArray[1]->setPwmLimits(MIN_PWM, MAX_PWM);
-    m_apJoinArray[2]->setPwmLimits(MIN_PWM, MAX_PWM);
-    m_apJoinArray[3]->setPwmLimits(MIN_PWM, MAX_PWM);
-    m_apJoinArray[4]->setPwmLimits(MIN_PWM, MAX_PWM);
+    m_apJoinArray[0]->setPwmLimits(8, 21);
+    m_apJoinArray[1]->setPwmLimits(10, 23);
+    m_apJoinArray[2]->setPwmLimits(8, 23);
+    m_apJoinArray[3]->setPwmLimits(13, 40);
+    m_apJoinArray[4]->setPwmLimits(11, 40);
 #endif
 
   }

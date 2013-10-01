@@ -5,8 +5,8 @@
 // Specify which Robot we are programming
 // ***************************************
 
-//#define ROBOT_1
-#define ROBOT_2
+//#define ROBOT_1 // Glued sensors
+#define ROBOT_2 // Screwed sensors
 
 // ***************************************
 // Specify which Robot we are programming
