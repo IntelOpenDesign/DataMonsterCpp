@@ -87,7 +87,7 @@ void setup() {
 
   ///  will need to move these to the update loop once they're inputing values dynamically
   /////////////////////////////springValue (usually small- (0.001-.1)
-  springValue = 0.01;
+  springValue = 0.03;
   /////////////////////////////////////////////////////////////////////
 
   ////////////////////////////dampening value (1= no dampening, 0 = full dampening (no movement)) Usually .9 or so.
@@ -270,7 +270,15 @@ void loop() {
   for (int i=0; i<5; i++){
     location[i] = location[i] + velocity[i];
   }  
-
+  
+ ///// Set Dampening couter/reset
+dampening = (dampening - 0.0005);
+if (dampening < 0.6){
+  dampening = 0.6;
+}
+if (g_bGotTweet == true){
+ dampening = 1.0; 
+}
 
 
   // Orient the robot towards the object
