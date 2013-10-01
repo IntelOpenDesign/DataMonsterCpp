@@ -149,8 +149,6 @@ private:
     // Update button state
     m_iPrevButtonReading = m_iButtonReading;
 
-    // Serial.println(m_iButtonReading, DEC);
-
     return bRet;
   }
 

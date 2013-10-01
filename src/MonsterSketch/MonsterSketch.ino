@@ -121,7 +121,7 @@ void setup() {
   TWITTER_MODULE_STATUS_LED_PIN);
 
   // Use the button to select between WiFi and Ethernet
-  if( digitalRead(TWITTER_MODULE_BUTTON_PIN) )
+  if( !digitalRead(TWITTER_MODULE_BUTTON_PIN) )
     g_bUseWiFi = true;
 
   // Init Ethernet/WiFi
@@ -413,7 +413,7 @@ void initNetwork(bool _bSetWiFi)
       Serial.println("Please upgrade the firmware");
 
     // attempt to connect to Wifi network:
-    while ( status != WL_CONNECTED) { 
+  //  while ( status != WL_CONNECTED) { 
       Serial.print("Attempting to connect to WPA SSID: ");
       Serial.println(NETWORK_SSID);
       // Connect to WPA/WPA2 network:    
@@ -421,7 +421,7 @@ void initNetwork(bool _bSetWiFi)
 
       // wait 10 seconds for connection:
       delay(10000);
-    }
+   // }
 
     // you're connected now, so print out the data:
     Serial.print("You're connected to the network");
