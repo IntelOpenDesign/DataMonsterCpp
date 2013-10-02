@@ -70,6 +70,8 @@ float velocity[5];
 float force[5];
 float magnitude[5];
 float location[5];
+int monsterTimer;
+
 
 float dampening;
 float springValue;
@@ -93,6 +95,8 @@ void setup() {
   ////////////////////////////dampening value (1= no dampening, 0 = full dampening (no movement)) Usually .9 or so.
   dampening = 0.9;
   //////////////////////////////////////////////////////////////////////
+  
+  monsterTimer=0;
 
   for (int i=0; i<5; i++){
     target[i] = 0.1;
@@ -134,7 +138,7 @@ void setup() {
 
 }
 
-void loop() {
+void loop(){ 
 
   // RUN JOINT CALIBRATION ROUTINE
 #ifdef CALIBRATING 
@@ -169,67 +173,111 @@ void loop() {
   /////////////////////////////////////////////
   // Set Robot
   /////////////////////////////////////////////
+  monsterTimer = monsterTimer + 1;
+  
   //////////////////HARDCODING VALUES TO JOINTS BASED ON COMMON SENSOR VALUES BELOW////////////////////////
   // X maps to joint 0
-  if(g_fX < -.1){
-    iPwmValue = mapfloat(g_fX, -.1, -0.6, g_poDataMonster->m_apJoinArray[0]->m_fPwmMin, g_poDataMonster->m_apJoinArray[0]->m_fPwmMin + 50);  ///////<-hardcoded!
+  if(g_fX > -.1){
+    iPwmValue = mapfloat(g_fX, -.1, -0.6, g_poDataMonster->m_apJoinArray[0]->m_fPwmMin, g_poDataMonster->m_apJoinArray[0]->m_fPwmMin + 5);  ///////<-hardcoded!
 
   } 
-  else if(g_fX > 0.1){
-    iPwmValue = mapfloat(g_fX, 0.1, 0.6, g_poDataMonster->m_apJoinArray[0]->m_fPwmMax , g_poDataMonster->m_apJoinArray[0]->m_fPwmMax - 50); ///////<-hardcoded!
+  else if(g_fX < 0.1){
+    iPwmValue = mapfloat(g_fX, 0.1, 0.6, g_poDataMonster->m_apJoinArray[0]->m_fPwmMax , g_poDataMonster->m_apJoinArray[0]->m_fPwmMax - 5); ///////<-hardcoded!
   }
   else{
     iPwmValue = mapfloat(g_fX, SENSOR_X_MIN, SENSOR_X_MAX, g_poDataMonster->m_apJoinArray[0]->m_fPwmMin, g_poDataMonster->m_apJoinArray[0]->m_fPwmMax);
   }
+ /////////////////////////////////////////////////// 
+  ////what to do
+  if (monsterTimer <= 160){
   target[0]= iPwmValue;
+ // Serial.println(monsterTimer);
+  }
+    if ((target[0] - iPwmValue > 2.5) || (target[0] - iPwmValue < -2.5 )){ 
+ monsterTimer =0;
+    }
+// Serial.println(monsterTimer);
+  
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
   // Z maps to joint 1
   if(g_fZ >= 0 && g_fZ < 0.1){
-    iPwmValue = mapfloat(g_fX, 0, (.1), g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax-50);  ///////<-hardcoded! 
+    iPwmValue = mapfloat(g_fX, 0, (.1), g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax-10);  ///////<-hardcoded! 
   }
   else if(g_fZ >= 0.1 && g_fZ< 0.2){
-    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin + 50, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);  ///////<-hardcoded!
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax-10);  ///////<-hardcoded!
   }
   else if(g_fZ >= 0.2 && g_fZ< 0.3){
-    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin + 30, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);  ///////<-hardcoded!
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax-5);  ///////<-hardcoded!
   }
   else if(g_fZ >= 0.3 && g_fZ< 0.6){
-    iPwmValue = mapfloat(g_fZ, 0.3, 0.6, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);  ///////<-hardcoded!
+    iPwmValue = mapfloat(g_fZ, 0.3, 0.6, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax-10, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);  ///////<-hardcoded!
   }
   else{
     iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);
   }
+  
+  //////////////////what to do
+   if (monsterTimer <= 105){
   target[1]= iPwmValue;
+  }
+  else if (monsterTimer <= 165){
+    target[1] = g_poDataMonster->m_apJoinArray[1]->m_fPwmMin;
+  }
+else{
+ target[1] = g_poDataMonster->m_apJoinArray[1]->m_fPwmMax; 
+}
+    
 
-  // Z maps to joint 2
+  
+
+
+
+  
+  
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//  // Z maps to joint 2
   if(g_fZ >= 0 && g_fZ < 0.1){
-    iPwmValue = mapfloat(g_fZ, 0, (.1), g_poDataMonster->m_apJoinArray[2]->m_fPwmMin, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax-50);  ///////<-hardcoded! 
+    iPwmValue = mapfloat(g_fZ, 0, (.1), g_poDataMonster->m_apJoinArray[2]->m_fPwmMax-10, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin);  ///////<-hardcoded! 
   }
-  else if(g_fZ >= 0.1 && g_fZ< 0.2){
-    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin + 50, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax);  ///////<-hardcoded!
-  }
-  else if(g_fZ >= 0.2 && g_fZ< 0.3){
-    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin + 30, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax);  ///////<-hardcoded!
+  else if(g_fZ >= 0.1 && g_fZ< 0.3){
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.3, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax-5, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin);  ///////<-hardcoded!
   }
   else if(g_fZ >= 0.3 && g_fZ< 0.6){
-    iPwmValue = mapfloat(g_fZ, 0.3, 0.6, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax);  ///////<-hardcoded!
+    iPwmValue = mapfloat(g_fZ, 0.3, 0.6, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin);  ///////<-hardcoded!
   }
   else{
-    iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax);
-
+    iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin+5);
   }
+  if (target[1] < g_poDataMonster->m_apJoinArray[1]->m_fPwmMax-10)
+  target[2] = target[1]; 
+
+  
+   if (monsterTimer <= 120){
   target[2]= iPwmValue;
+  }
+  else {
+    target[2] = g_poDataMonster->m_apJoinArray[1]->m_fPwmMin;
+  }
+ 
+  
+  
+
+  
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Z maps to joint 3
   if(g_fZ >= 0 && g_fZ < 0.1){
-    iPwmValue = mapfloat(g_fZ, 0, (.1), g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);  ///////<-hardcoded! 
+    iPwmValue = mapfloat(g_fZ, 0, (.1), g_poDataMonster->m_apJoinArray[3]->m_fPwmMax, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax-10);  ///////<-hardcoded! 
   }
   else if(g_fZ >= 0.1 && g_fZ< 0.2){
-    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);  ///////<-hardcoded!
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin+10);  ///////<-hardcoded!
   }
   else if(g_fZ >= 0.2 && g_fZ< 0.3){
-    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);  ///////<-hardcoded!
+    iPwmValue = mapfloat(g_fZ, 0.1, 0.2, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax-10);  ///////<-hardcoded!
   }
   else if(g_fZ >= 0.3 && g_fZ< 0.6){
     iPwmValue = mapfloat(g_fZ, 0.3, 0.6, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);  ///////<-hardcoded!
@@ -237,26 +285,62 @@ void loop() {
   else{
     iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);
   }
+     if (monsterTimer <= 110){
   target[3]= iPwmValue;
+  }
+  else if (monsterTimer <= 130){
+  target[3]= 25;
+  }
+    else if (monsterTimer <= 150){
+  target[3]= 10;
+  }
+     else if (monsterTimer <= 160){
+  target[3]= g_poDataMonster->m_apJoinArray[3]->m_fPwmMax;
+  }
+     else if (monsterTimer <= 175){
+  target[3]= g_poDataMonster->m_apJoinArray[3]->m_fPwmMin;
+  }
+  else{
+    target[3]= iPwmValue;
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Y maps to joint 4
-  if(g_fZ >= 0 && g_fZ < 0.1){
-    iPwmValue = mapfloat(g_fY, 0, (.1), g_poDataMonster->m_apJoinArray[4]->m_fPwmMin, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-50);  ///////<-hardcoded! 
+  if(g_fY >= 0 && g_fY < 0.1){
+    iPwmValue = mapfloat(g_fY, 0, (.1), g_poDataMonster->m_apJoinArray[4]->m_fPwmMax, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-5);  ///////<-hardcoded! 
   }
-  else if(g_fZ >= 0.1 && g_fZ< 0.2){
-    iPwmValue = mapfloat(g_fY, 0.1, 0.2, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin + 50, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);  ///////<-hardcoded!
+  else if(g_fY >= 0.1 && g_fY< 0.2){
+    iPwmValue = mapfloat(g_fY, 0.1, 0.2, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin , g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-5);  ///////<-hardcoded!
   }
-  else if(g_fZ >= 0.2 && g_fZ< 0.3){
-    iPwmValue = mapfloat(g_fY, 0.1, 0.2, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin + 30, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);  ///////<-hardcoded!
+  else if(g_fY >= 0.2 && g_fY< 0.3){
+    iPwmValue = mapfloat(g_fY, 0.1, 0.2, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin + 8, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);  ///////<-hardcoded!
   }
-  else if(g_fZ >= 0.3 && g_fZ< 0.6){
-    iPwmValue = mapfloat(g_fY, 0.3, 0.6, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);  ///////<-hardcoded!
+  else if(g_fY >= 0.3 && g_fY< 0.6){
+    iPwmValue = mapfloat(g_fY, 0.3, 0.6, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-5, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);  ///////<-hardcoded!
   }
   else{
     iPwmValue = mapfloat(g_fY, SENSOR_X_MIN, SENSOR_X_MAX, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);
-
   }
+  
+  //target[4]= iPwmValue;
+  // target[4]= 15;
+  
+     if (monsterTimer <= 90){
   target[4]= iPwmValue;
+  }
+  else if(monsterTimer <= 105){
+target[4] = g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-2;
+  }
+    else if(monsterTimer <=160){
+target[4] = g_poDataMonster->m_apJoinArray[4]->m_fPwmMin+10;
+    }
+   else {
+     target[4]= g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-2;
+   }
+   
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+ //Dampening code
 
   for (int i=0; i<5; i++){
     magnitude[i] = target[i] - location[i];
@@ -273,17 +357,19 @@ void loop() {
   
  ///// Set Dampening couter/reset
 dampening = (dampening - 0.0005);
-if (dampening < 0.6){
-  dampening = 0.6;
+if (dampening < 0.8){
+  dampening = 0.8;
 }
 if (g_bGotTweet == true){
- dampening = 1.0; 
+ dampening = .95; 
 }
 
 
   // Orient the robot towards the object
+  if(monsterTimer <=190){
   g_poDataMonster->setPosture(location[0],  location[1],  location[2], location[3], location [4], g_bGotTweet);
-
+  }
+  
 #endif
 
 }
