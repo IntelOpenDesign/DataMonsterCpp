@@ -161,6 +161,9 @@ void loop(){
   String sServerString = checkTwitter(g_bUseWiFi);
   g_bGotTweet = g_poTweeterListener->gotTweet(sServerString); 
 
+if(g_bGotTweet == true) {
+ monsterTimer = 0; 
+}
   /////////////////////////////////////////////
   // Get Object Location
   /////////////////////////////////////////////
@@ -193,7 +196,7 @@ void loop(){
   target[0]= iPwmValue;
  // Serial.println(monsterTimer);
   }
-    if ((target[0] - iPwmValue > 2.5) || (target[0] - iPwmValue < -2.5 )){ 
+    if ((target[0] - iPwmValue > 1.9) || (target[0] - iPwmValue < -1.9 )){ 
  monsterTimer =0;
     }
 // Serial.println(monsterTimer);
@@ -370,6 +373,9 @@ if (g_bGotTweet == true){
   g_poDataMonster->setPosture(location[0],  location[1],  location[2], location[3], location [4], g_bGotTweet);
   }
   
+  if(monsterTimer > 400)
+    monsterTimer = 400;
+  
 #endif
 
 }
@@ -511,7 +517,8 @@ void initNetwork(bool _bSetWiFi)
       Serial.print("Attempting to connect to WPA SSID: ");
       Serial.println(NETWORK_SSID);
       // Connect to WPA/WPA2 network:    
-      status = WiFi.begin(NETWORK_SSID, NETWORK_PASS);
+      //status = WiFi.begin(NETWORK_SSID, NETWORK_PASS);
+      status = WiFi.begin(NETWORK_SSID);
 
       // wait 10 seconds for connection:
       delay(10000);
@@ -533,13 +540,13 @@ void initNetwork(bool _bSetWiFi)
       Serial.println("Failed to configure Ethernet using DHCP");
     }
 
-    /*
+    
     if (!Ethernet.begin(mac)) {
      // if DHCP fails, start with a hard-coded address:
      Serial.println("failed to get an IP address using DHCP, trying manually");
      Ethernet.begin(mac, ip);
      }
-     */
+     
     Serial.print("My address:");
     Serial.println(Ethernet.localIP());
     // connect to Twitter:
@@ -589,7 +596,9 @@ String checkTwitter(bool _bSetWiFi)
   String sRetString = "";
 
   if (client.connected() || g_oWiFiClient.connected() ) {
+  //  Serial.println("Connected");
     if (client.available() || g_oWiFiClient.available() ) {
+    //Serial.println("Data Available");
       // read incoming bytes:
       char inChar;
       if(_bSetWiFi)

@@ -123,11 +123,14 @@ public:
 
   void happyRoutine(int _iJoint)
   {
-    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin);    
+    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin); 
+   moveJoint(0,m_apJoinArray[0]->m_fPwmMax);   
     delay(500);
-    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMax);    
+    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMax); 
+    moveJoint(0,m_apJoinArray[0]->m_fPwmMin);   
     delay(500);
-    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin);    
+    moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMin);
+   moveJoint(0,m_apJoinArray[0]->m_fPwmMax);    
     delay(500);
     moveJoint(_iJoint,m_apJoinArray[_iJoint]->m_fPwmMax);    
     delay(500);

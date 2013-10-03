@@ -16,8 +16,11 @@
 //////////////////////////////////////////
 // Network Settings
 //////////////////////////////////////////
-#define NETWORK_SSID "BlackSwan_Portal"
-#define NETWORK_PASS "88288818"
+//#define NETWORK_SSID "BlackSwan_Portal"
+//#define NETWORK_PASS "88288818"
+#define NETWORK_SSID "makerfaire"
+#define NETWORK_PASS ""
+
 
 #define TWITTER_MODULE_STATUS_LED_PIN 7
 
