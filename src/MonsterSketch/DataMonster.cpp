@@ -77,7 +77,8 @@ public:
 
 #ifdef ROBOT_1
     m_apJoinArray[0]->setPwmLimits(10, 33);
-    m_apJoinArray[1]->setPwmLimits(18, 31);
+//    m_apJoinArray[1]->setPwmLimits(18, 31);
+    m_apJoinArray[1]->setPwmLimits(20, 31);
     m_apJoinArray[2]->setPwmLimits(8, 27);
     m_apJoinArray[3]->setPwmLimits(11, 37);
     m_apJoinArray[4]->setPwmLimits(10, 35);

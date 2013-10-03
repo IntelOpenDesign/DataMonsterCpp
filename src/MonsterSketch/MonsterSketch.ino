@@ -260,7 +260,7 @@ else{
   target[2]= iPwmValue;
   }
   else {
-    target[2] = g_poDataMonster->m_apJoinArray[1]->m_fPwmMin;
+    target[2] = g_poDataMonster->m_apJoinArray[2]->m_fPwmMin+2;
   }
  
   
