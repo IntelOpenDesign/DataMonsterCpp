@@ -1,12 +1,16 @@
 #ifndef INCLUDES_H
 #define INCLUDES_H
 
+//////////////////////////////////////////
+// Configuration Variables
+//////////////////////////////////////////
+
 // ***************************************
 // Specify which Robot we are programming
 // ***************************************
 
-//#define ROBOT_1 // Glued sensors
-#define ROBOT_2 // Screwed sensors
+#define ROBOT_1 // Glued sensors
+//#define ROBOT_2 // Screwed sensors
 
 // ***************************************
 // Specify which Robot we are programming
@@ -21,12 +25,8 @@
 #define NETWORK_SSID "makerfaire"
 #define NETWORK_PASS ""
 
-
 #define TWITTER_MODULE_STATUS_LED_PIN 7
-
 #define JSON_BUFFER_SIZE 512
-
-//#define WIFI
 
 //////////////////////////////////////////
 // Robot Macros

@@ -5,7 +5,6 @@
 
 #define MAX_LOCATION 1.0 // Sensors out of bounds threshold
 
-
 class SensorModule{
   //trying to do this without a vector class- only need a few addition/subtraction/mult opps.
 
@@ -13,7 +12,7 @@ class SensorModule{
   //Location is value after dampening.  Target is the raw sensor value mapped to x,y,z space 
 public:
 
-float target[3];
+  float target[3];
 
   //raw sensor values- left, right and up
   float sensorL;
@@ -36,30 +35,9 @@ private:
   float force[3];
   float magnitude[3];
 
-
-
 public:
   //Constructor
   SensorModule(int _iStatusLed){
-    ///  will need to move these to the update loop once they're inputing values dynamically
-    /////////////////////////////springValue (usually small- (0.001-.1)
-    //springValue = 0.01;
-    /////////////////////////////////////////////////////////////////////
-
-    ////////////////////////////dampening value (1= no dampening, 0 = full dampening (no movement)) Usually .9 or so.
-    //dampening = 0.9;
-    //////////////////////////////////////////////////////////////////////
-
-//    for (int i=0; i<3; i++){
-//      location[i] = 0.1;
-//    }
-//    for (int i=0; i<3; i++){
-//      force[i] = 0.1;
-//    }
-//    for (int i=0; i<3; i++){
-//      magnitude[i] = 0.1;
-//    }
-    //feed in moods, etc
 
     for (int i=0; i<3; i++){
       target[i] = 0.1;
@@ -89,21 +67,8 @@ public:
 
   void update(){
     sensorL = analogRead(A0);
-    //delay(100);
     sensorR = analogRead(A1);
-    //delay(100);
     sensorUP = analogRead(A2);
-    //delay(100);
-
-
-//    Serial.print(sensorL, DEC);
-//    Serial.print(",");
-//    delay(1);
-//    Serial.print(sensorR, DEC);
-//    Serial.print(",");
-//    delay(1);
-//    Serial.print(sensorUP, DEC);
-//    Serial.println();
 
     ///////////////////////////////////////////Sensor Calibration Adjustments
     left = map( sensorL, 0, 700, 0, 1000);
@@ -125,7 +90,6 @@ public:
     upxyz[1] = (sin(PI/4)*(up/1000));
     upxyz[2] = (cos(PI/4)*(up/1000));
 
-
     target[0] =  (lxyz[0] + rxyz[0]);
     target[1] = (upxyz[1]);
 
@@ -139,27 +103,12 @@ public:
     else {
       target[2] = upxyz[2];
     }
-
-
-    /////////////////////////////////////////////////////////Spring and Dampening code///////////////////////////////////
-//    for (int i=0; i<3; i++){
-//      magnitude[i] = target[i] - location[i];
-//    }  
-//    for (int i=0; i<3; i++){
-//      force[i] = (magnitude[i] * springValue);
-//    }  
-//    for (int i=0; i<3; i++){
-//      velocity[i] = dampening * (velocity[i] + force[i]);
-//    }  
-//    for (int i=0; i<3; i++){
-//      location[i] = location[i] + velocity[i];
-//    }  
-
   }
 
 };
 
 #endif // SENSOR_MODULE_CPP
+
 
 
 

@@ -1,15 +1,9 @@
-//#include "Servo.cpp"g_oDataMonster
 #include "DataMonster.cpp"
 #include "SensorModule.cpp"
 #include "TwitterModule.cpp"
 #include <Ethernet.h>
 #include <WiFi.h>
-//#include "Includes.h"
 #include "Wire.h"
-
-// Function Signatures
-void getSerialCommand();
-void getPersonsLocation(float& _fX, float& _fY, float& _fZ);
 
 // Globals
 DataMonster* g_poDataMonster;
@@ -29,28 +23,23 @@ EthernetClient client;
 
 #define TWITTER_POLLING_TIME 100
 unsigned long int g_iTwitterPollCounter = 0;
-//unsigned int g_iTwitterPollCounter = 0;
 
-byte mac[] = { 
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192,168,1,20);
+
 char server[] = "www.thingspeak.com"; //https://www.thingspeak.com/channels/7554/field/1/last.json
-//String g_sHttpRequest = "GET /channels/7554/field/1/last.json HTTP/1.0"; // Carlos' channel
-String g_sHttpRequest = "GET /channels/7556/field/1/last.json HTTP/1.0"; // Lucas' channel
+String g_sHttpRequest = "GET /channels/7556/field/1/last.json HTTP/1.0"; // Thingspeak data channel
 
 unsigned long g_iLastAttemptTime = 0;
 const unsigned long g_iRequestInterval = 10000;  // delay between requests
 boolean g_bRequested;                   // whether you've made a request since connecting
 
-//String currentLine = "";            // string to hold the text from server
 String g_sJsonString = "";
-boolean readingJsonString = false;       // if you're currently reading the tweet
+boolean readingJsonString = false;  // if you're currently reading the tweet
 
 //////////////////////////////////////////
 int g_iPwmValue = 5;
 bool g_bSettingLowLimit = true;
-//float g_fAngle = 0;
-//float g_fOneDegInRad = 0;
 int g_iJointSelect;
 int g_iJointCounter;
 long g_iJointUpdateTimerCounter;
@@ -72,7 +61,6 @@ float magnitude[5];
 float location[5];
 int monsterTimer;
 
-
 float dampening;
 float springValue;
 
@@ -82,20 +70,11 @@ float springValue;
 #define RIGHT 100 // d
 #define SPACE 32 // space 
 
-// Test
-int g_iLed13 = 13;
-
 void setup() {
 
-  ///  will need to move these to the update loop once they're inputing values dynamically
-  /////////////////////////////springValue (usually small- (0.001-.1)
-  springValue = 0.03;
-  /////////////////////////////////////////////////////////////////////
-
-  ////////////////////////////dampening value (1= no dampening, 0 = full dampening (no movement)) Usually .9 or so.
-  dampening = 0.9;
-  //////////////////////////////////////////////////////////////////////
-  
+  // Initializing Robot Behaviour variables
+  springValue = 0.03; // Value usually small- (0.001-.1)
+  dampening = 0.9; // (1= no dampening, 0 = full dampening (no movement)) Usually .9 or so.
   monsterTimer=0;
 
   for (int i=0; i<5; i++){
@@ -113,23 +92,19 @@ void setup() {
 
   //Initialize serial and wait for port to open:
   Serial.begin(9600); 
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
-  }
 
-  // Init abstract hardware classes
+  // Init abstract hardware objects
   g_poDataMonster = new DataMonster();
   g_poMySensorModule = new SensorModule(SENSOR_MODULE_STATUS_LED_PIN);
   g_poTweeterListener = new TwitterModule(TWITTER_MODULE_BUTTON_PIN,
   TWITTER_MODULE_STATUS_LED_PIN,
   TWITTER_MODULE_STATUS_LED_PIN);
 
-  // Use the button to select between WiFi and Ethernet
+  // Initialize Web Connectivity
   if( !digitalRead(TWITTER_MODULE_BUTTON_PIN) )
-    g_bUseWiFi = true;
+    g_bUseWiFi = true; // Use the button to select between WiFi and Ethernet
 
-  // Init Ethernet/WiFi
-  initNetwork(g_bUseWiFi);
+  initNetwork(g_bUseWiFi); // Init Ethernet/WiFi
 
   // prints title with ending line break 
   Serial.println("*************************************"); 
@@ -143,12 +118,14 @@ void loop(){
   // RUN JOINT CALIBRATION ROUTINE
 #ifdef CALIBRATING 
 
+  ////////////////////////////////////////////////////////
   // Check Serial for command for Robot joint calibration
+  ////////////////////////////////////////////////////////
   getSerialCommand();
 
-  //////////////
-  // Check if Robot is calibrated  
-  /////////////
+  ////////////////////////////////
+  // Check if Robot is calibrated 
+  ////////////////////////////////
   calibRobot();
 
 #else // RUN ROBOT PROGRAM
@@ -161,9 +138,10 @@ void loop(){
   String sServerString = checkTwitter(g_bUseWiFi);
   g_bGotTweet = g_poTweeterListener->gotTweet(sServerString); 
 
-if(g_bGotTweet == true) {
- monsterTimer = 0; 
-}
+  if(g_bGotTweet == true) {
+    monsterTimer = 0; 
+  }
+  
   /////////////////////////////////////////////
   // Get Object Location
   /////////////////////////////////////////////
@@ -174,10 +152,23 @@ if(g_bGotTweet == true) {
   g_poMySensorModule->getLocation(g_fX,g_fY,g_fZ);
 
   /////////////////////////////////////////////
-  // Set Robot
+  // Set Robot Joints
   /////////////////////////////////////////////
-  monsterTimer = monsterTimer + 1;
+  setRobotBehaviour();
+
+#endif
+
+}
+
+
+///////////////////////////////
+// Robot behaviour
+//////////////////////////////
+void setRobotBehaviour()
+{
   
+    monsterTimer = monsterTimer + 1;
+
   //////////////////HARDCODING VALUES TO JOINTS BASED ON COMMON SENSOR VALUES BELOW////////////////////////
   // X maps to joint 0
   if(g_fX > -.1){
@@ -190,19 +181,15 @@ if(g_bGotTweet == true) {
   else{
     iPwmValue = mapfloat(g_fX, SENSOR_X_MIN, SENSOR_X_MAX, g_poDataMonster->m_apJoinArray[0]->m_fPwmMin, g_poDataMonster->m_apJoinArray[0]->m_fPwmMax);
   }
- /////////////////////////////////////////////////// 
+  /////////////////////////////////////////////////// 
   ////what to do
   if (monsterTimer <= 160){
-  target[0]= iPwmValue;
- // Serial.println(monsterTimer);
+    target[0]= iPwmValue;
   }
-    if ((target[0] - iPwmValue > 1.9) || (target[0] - iPwmValue < -1.9 )){ 
- monsterTimer =0;
-    }
-// Serial.println(monsterTimer);
-  
+  if ((target[0] - iPwmValue > 1.9) || (target[0] - iPwmValue < -1.9 )){ 
+    monsterTimer =0;
+  }
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
   // Z maps to joint 1
   if(g_fZ >= 0 && g_fZ < 0.1){
@@ -220,29 +207,21 @@ if(g_bGotTweet == true) {
   else{
     iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[1]->m_fPwmMin, g_poDataMonster->m_apJoinArray[1]->m_fPwmMax);
   }
-  
+
   //////////////////what to do
-   if (monsterTimer <= 105){
-  target[1]= iPwmValue;
+  if (monsterTimer <= 105){
+    target[1]= iPwmValue;
   }
   else if (monsterTimer <= 165){
     target[1] = g_poDataMonster->m_apJoinArray[1]->m_fPwmMin;
   }
-else{
- target[1] = g_poDataMonster->m_apJoinArray[1]->m_fPwmMax; 
-}
-    
+  else{
+    target[1] = g_poDataMonster->m_apJoinArray[1]->m_fPwmMax; 
+  }
 
-  
-
-
-
-  
-  
-  
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//  // Z maps to joint 2
+  //  // Z maps to joint 2
   if(g_fZ >= 0 && g_fZ < 0.1){
     iPwmValue = mapfloat(g_fZ, 0, (.1), g_poDataMonster->m_apJoinArray[2]->m_fPwmMax-10, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin);  ///////<-hardcoded! 
   }
@@ -256,20 +235,14 @@ else{
     iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[2]->m_fPwmMax, g_poDataMonster->m_apJoinArray[2]->m_fPwmMin+5);
   }
   if (target[1] < g_poDataMonster->m_apJoinArray[1]->m_fPwmMax-10)
-  target[2] = target[1]; 
+    target[2] = target[1]; 
 
-  
-   if (monsterTimer <= 120){
-  target[2]= iPwmValue;
+  if (monsterTimer <= 120){
+    target[2]= iPwmValue;
   }
   else {
     target[2] = g_poDataMonster->m_apJoinArray[2]->m_fPwmMin+2;
   }
- 
-  
-  
-
-  
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Z maps to joint 3
@@ -288,20 +261,20 @@ else{
   else{
     iPwmValue = mapfloat(g_fZ, SENSOR_Z_MIN, SENSOR_Z_MAX, g_poDataMonster->m_apJoinArray[3]->m_fPwmMin, g_poDataMonster->m_apJoinArray[3]->m_fPwmMax);
   }
-     if (monsterTimer <= 110){
-  target[3]= iPwmValue;
+  if (monsterTimer <= 110){
+    target[3]= iPwmValue;
   }
   else if (monsterTimer <= 130){
-  target[3]= 25;
+    target[3]= 25;
   }
-    else if (monsterTimer <= 150){
-  target[3]= 10;
+  else if (monsterTimer <= 150){
+    target[3]= 10;
   }
-     else if (monsterTimer <= 160){
-  target[3]= g_poDataMonster->m_apJoinArray[3]->m_fPwmMax;
+  else if (monsterTimer <= 160){
+    target[3]= g_poDataMonster->m_apJoinArray[3]->m_fPwmMax;
   }
-     else if (monsterTimer <= 175){
-  target[3]= g_poDataMonster->m_apJoinArray[3]->m_fPwmMin;
+  else if (monsterTimer <= 175){
+    target[3]= g_poDataMonster->m_apJoinArray[3]->m_fPwmMin;
   }
   else{
     target[3]= iPwmValue;
@@ -324,27 +297,22 @@ else{
   else{
     iPwmValue = mapfloat(g_fY, SENSOR_X_MIN, SENSOR_X_MAX, g_poDataMonster->m_apJoinArray[4]->m_fPwmMin, g_poDataMonster->m_apJoinArray[4]->m_fPwmMax);
   }
-  
-  //target[4]= iPwmValue;
-  // target[4]= 15;
-  
-     if (monsterTimer <= 90){
-  target[4]= iPwmValue;
+
+  if (monsterTimer <= 90){
+    target[4]= iPwmValue;
   }
   else if(monsterTimer <= 105){
-target[4] = g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-2;
+    target[4] = g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-2;
   }
-    else if(monsterTimer <=160){
-target[4] = g_poDataMonster->m_apJoinArray[4]->m_fPwmMin+10;
-    }
-   else {
-     target[4]= g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-2;
-   }
-   
+  else if(monsterTimer <=160){
+    target[4] = g_poDataMonster->m_apJoinArray[4]->m_fPwmMin+10;
+  }
+  else {
+    target[4]= g_poDataMonster->m_apJoinArray[4]->m_fPwmMax-2;
+  }
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
- //Dampening code
 
+  //Dampening code
   for (int i=0; i<5; i++){
     magnitude[i] = target[i] - location[i];
   }  
@@ -357,30 +325,29 @@ target[4] = g_poDataMonster->m_apJoinArray[4]->m_fPwmMin+10;
   for (int i=0; i<5; i++){
     location[i] = location[i] + velocity[i];
   }  
-  
- ///// Set Dampening couter/reset
-dampening = (dampening - 0.0005);
-if (dampening < 0.8){
-  dampening = 0.8;
-}
-if (g_bGotTweet == true){
- dampening = .95; 
-}
 
+  ///// Set Dampening couter/reset
+  dampening = (dampening - 0.0005);
+  if (dampening < 0.8){
+    dampening = 0.8;
+  }
+  if (g_bGotTweet == true){
+    dampening = .95; 
+  }
 
   // Orient the robot towards the object
   if(monsterTimer <=190){
-  g_poDataMonster->setPosture(location[0],  location[1],  location[2], location[3], location [4], g_bGotTweet);
+    g_poDataMonster->setPosture(location[0],  location[1],  location[2], location[3], location [4], g_bGotTweet);
   }
-  
+
   if(monsterTimer > 400)
     monsterTimer = 400;
   
-#endif
-
 }
 
+///////////////////////////////
 // Robot calibration interface
+//////////////////////////////
 void calibRobot()
 {
   // Update the joint position every 100 draw cycles
@@ -407,67 +374,23 @@ void calibRobot()
   }
 }
 
-// Robot calibration interface
-void carlosControlRobot()
-{
-  //print("Calibrating Robot\n");
-
-  // Update the joint position every 100 draw cycles
-  g_iJointUpdateTimerCounter++;
-  if ( (g_iJointUpdateTimerCounter%JOINT_UPDATE_TIMER_COUNTER_LIMIT) == 0) {
-
-    // Move the joint to the next PWM value
-    g_poDataMonster->moveJoint(g_iJointSelect, g_iPwmValue);
-
-    Serial.print("Controlingd | Joint: ");
-    Serial.print(g_iJointSelect);
-    Serial.print(" | Limit: LOW | PWM Value: ");
-    Serial.println(g_iPwmValue);
-  }
-}
-
-
-// Robot control
-void controlRobot()
-{
-  // print("Controlling Robot\n");
-
-  // Control Robot Code
-  carlosControlRobot(); // This replaces all the steps below. Just testing.
-
-  // 1) Input: Get data stream / Get camera stream
-
-  // 2) Process: Get data stream / process camera
-
-  // 3) Ouput: Actuate Robot
-
-    // 4) Update GUI
-}
-
 void getSerialCommand() {
   if (Serial.available() > 0) {
     // get incoming byte:
     g_iByte = Serial.read();
-    //Serial.println(g_iByte);
 
     if (g_iByte == UP) {
       g_iPwmValue += 1;
-      //g_fAngle += g_fOneDegInRad;
     } 
     else if (g_iByte == DOWN) {
       g_iPwmValue -= 1;
-      //g_fAngle -= g_fOneDegInRad;
     }
     else if (g_iByte == LEFT) {
-
       g_iPwmValue = 5;
-      //g_fAngle = 0;
       g_iJointCounter--;
     } 
     else if (g_iByte == RIGHT) {
-
       g_iPwmValue = 5;
-      //g_fAngle = 0;
       g_iJointCounter++;
     }
   }
@@ -483,15 +406,6 @@ void getSerialCommand() {
     g_iJointCounter = TOTAL_NUM_JOINTS-1;
 
   g_iJointSelect = g_iJointCounter;
-}
-
-//////////
-void blinkPin13()
-{
-  digitalWrite(g_iLed13, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);               // wait for a second
-  digitalWrite(g_iLed13, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);               // wait for a second
 }
 
 ///////////////////////////////
@@ -513,22 +427,17 @@ void initNetwork(bool _bSetWiFi)
       Serial.println("Please upgrade the firmware");
 
     // attempt to connect to Wifi network:
-  //  while ( status != WL_CONNECTED) { 
-      Serial.print("Attempting to connect to WPA SSID: ");
-      Serial.println(NETWORK_SSID);
-      // Connect to WPA/WPA2 network:    
-      //status = WiFi.begin(NETWORK_SSID, NETWORK_PASS);
-      status = WiFi.begin(NETWORK_SSID);
+    Serial.print("Attempting to connect to WPA SSID: ");
+    Serial.println(NETWORK_SSID);
+    // Connect to WPA/WPA2 network:    
+    status = WiFi.begin(NETWORK_SSID);
 
-      // wait 10 seconds for connection:
-      delay(10000);
-   // }
+    // wait 10 seconds for connection:
+    delay(10000);
 
     // you're connected now, so print out the data:
     Serial.print("You're connected to the network");
-//    printCurrentNet();
-//    printWifiData();
-      printWifiStatus();
+    printWifiStatus();
 
   }
   else
@@ -540,74 +449,37 @@ void initNetwork(bool _bSetWiFi)
       Serial.println("Failed to configure Ethernet using DHCP");
     }
 
-    
     if (!Ethernet.begin(mac)) {
-     // if DHCP fails, start with a hard-coded address:
-     Serial.println("failed to get an IP address using DHCP, trying manually");
-     Ethernet.begin(mac, ip);
-     }
-     
+      // if DHCP fails, start with a hard-coded address:
+      Serial.println("failed to get an IP address using DHCP, trying manually");
+      Ethernet.begin(mac, ip);
+    }
+
     Serial.print("My address:");
     Serial.println(Ethernet.localIP());
-    // connect to Twitter:
-    //connectToServer(_bSetWiFi);
 
-  // give the network shield a second to initialize:
-  delay(1000);
-
+    // give the network shield a second to initialize:
+    delay(1000);
   }
 
   connectToServer(_bSetWiFi);
 
-
 }
-/*
-String checkTwitter(bool _bSetWiFi)
-{
-  String sRetString = "";
-  g_iTwitterPollCounter++;
-  //if(g_iTwitterPollCounter%TWITTER_POLLING_TIME == 0) // Check Tweeter every ~5 seconds
-  //if(g_iTwitterPollCounter == TWITTER_POLLING_TIME) // Check Tweeter every ~5 seconds
-  //  if( (g_iTwitterPollCounter%TWITTER_POLLING_TIME) == 0) // Check Tweeter every ~5 seconds
-  //  {
-  //g_iTwitterPollCounter = 0;
-  if(_bSetWiFi)
-  {
-    sRetString = checkTwitterWiFi(_bSetWiFi);
-  }
-  else
-  {
-    sRetString = checkTwitterEthernet(_bSetWiFi);
-    //   Serial.println("*********************** HERE");
-  }
 
-  //  }
-
-  return sRetString;
-}
-*/
-
-// String g_sJsonString = "";
-// boolean readingJsonString = false;
-
-//String checkTwitterEthernet(bool _bSetWiFi)
 String checkTwitter(bool _bSetWiFi)
 {
   String sRetString = "";
 
   if (client.connected() || g_oWiFiClient.connected() ) {
-  //  Serial.println("Connected");
+    //  Serial.println("Connected");
     if (client.available() || g_oWiFiClient.available() ) {
-    //Serial.println("Data Available");
+      //Serial.println("Data Available");
       // read incoming bytes:
       char inChar;
       if(_bSetWiFi)
         inChar = g_oWiFiClient.read();
       else
         inChar = client.read();      
-      
-      // Debug
-      //Serial.write(inChar);
 
       if ( inChar == '{' ) {
         // tweet is beginning. Clear the tweet string:
@@ -628,7 +500,6 @@ String checkTwitter(bool _bSetWiFi)
           sRetString = g_sJsonString;
           Serial.println(g_sJsonString);   
           // close the connection to the server:
-          //client.stop(); 
           if(_bSetWiFi)
             g_oWiFiClient.stop();
           else
@@ -662,12 +533,11 @@ void connectToServer(bool _bSetWiFi) {
     }
     else
     {
-        Serial.println("WiFi NOT connected to server"); 
+      Serial.println("WiFi NOT connected to server"); 
     }
   }
   else
   {
-
     // attempt to connect, and wait a millisecond:
     Serial.println("Ethernet connecting to server...");
     if (client.connect(server, 80)) {
@@ -678,18 +548,11 @@ void connectToServer(bool _bSetWiFi) {
     }
     else
     {
-        Serial.println("Ethernet NOT connected to server"); 
+      Serial.println("Ethernet NOT connected to server"); 
     }
   }
-  //#endif
-
   // note the time of this connect attempt:
   g_iLastAttemptTime = millis();
-
-}
-
-String checkTwitterWiFi(bool _bSetWiFi)
-{
 
 }
 
@@ -773,6 +636,3 @@ void printWifiStatus() {
   Serial.print(rssi);
   Serial.println(" dBm");
 }
-
-
-

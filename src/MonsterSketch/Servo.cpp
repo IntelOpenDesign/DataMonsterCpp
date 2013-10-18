@@ -11,19 +11,9 @@ class Servo {
   ///////////////////////////
 private:
   int m_iPinNum ;
-
-  //  static const int MIN_PWM = 0;
-  //  static const int MAX_PWM = 255;
-  //  static const int MIN_ANGLE = 0;
-  //  static const float MAX_ANGLE = PI;
-  //float PWM_TO_RAD = 81.4873; // WARNING: This is an approximation assuming the mapping [0 - 255] <-> [-PI/2 - PI/2] 
-
-
   float m_fPwmMidPoint;
-
   float m_fAngMax;
   float m_fAngMin;
-
   bool m_bIsServoCalib;
 
   ///////////////////////////
@@ -44,8 +34,8 @@ private:
   void setPwmI2C(int _iPinNum, int _iPwmVal)
   {
     // Select pin to write I2C commands to
-     analogWrite(_iPinNum,1);
-    
+    analogWrite(_iPinNum,1);
+
     // Set divider to get 125Hz freq.
     Wire.beginTransmission(0x20);
     Wire.write(0x2C);
@@ -82,7 +72,6 @@ public:
   // Public methods / Interface
   ///////////////////////////
 
-
   // Constructor
   Servo(int _iPinNum) {
 
@@ -93,17 +82,12 @@ public:
     //   PWM_TO_RAD = MAX_PWM / MAX_ANGLE;
     m_fPwmMin = -1;
     m_fPwmMax = -1;
-    //    m_fAngMax = -1;
-    //   m_fAngMin = -1;
 
     // Enable I2C to control servo
     Wire.begin();
 
     // Assign servo pin
     setPin(_iPinNum);
-
-
-
     m_bIsServoCalib = false;
   }
 
@@ -147,14 +131,6 @@ public:
     {
       // Calculate mid point
       m_fPwmMidPoint = (m_fPwmMax-m_fPwmMin)/2.0;
-
-      // Calculate angle offset
-      // m_fAngMax = (m_fPwmMax-m_fPwmMidPoint)/PWM_TO_RAD;
-      // m_fAngMin = (m_fPwmMin-m_fPwmMidPoint)/PWM_TO_RAD;
-
-      //print("m_fAngMax: " + m_fAngMax + "\n");
-      //print("m_fAngMin: " + m_fAngMin + "\n");
-
       m_bIsServoCalib = true;
     }
     else
@@ -162,22 +138,6 @@ public:
       Serial.println("ERROR: PWM MIN and MAX have not been set. Pleae use setPwmLowLimit() and setPwmHighLimit() first.\n");
     }
   }
-
-  // Set angle from 0 - 180 deg // THIS MAY CHANGE IN THE FUTURE
-  // For now angle and PWM are a 1:1 mapping. We'll change this in a future calibration routine
-  /*
-   bool setAngle(float _fAngle) {
-   if ( m_fAngMin <= _fAngle && _fAngle <= m_fAngMax ) {
-   int iPwnVal = (int)(_fAngle*PWM_TO_RAD);
-   setPwm( iPwnVal );
-   }
-   else {
-   return true;
-   }
-   
-   return false;
-   }    
-   */
 
   // Once calibrated this is the function used
   bool setSteps(int _iSteps) {
@@ -187,7 +147,6 @@ public:
     else {
       return true;
     }
-
     return false;
   }
 
@@ -195,15 +154,10 @@ public:
   void setCalibSteps(int _iSteps) {
     setPwm( _iSteps );
   }
-
-  // Invert PWM signal 
-
-  // Calibrate
-
-  // Smoothing function
 };
 
 #endif // SERVO_CPP
+
 
 
 

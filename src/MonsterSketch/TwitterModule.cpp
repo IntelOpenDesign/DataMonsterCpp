@@ -3,18 +3,8 @@
 
 #include "Includes.h"
 #include "aJSON.h"
-//#include "Ethernet.h"
-//#include "WiFi.h"
-
-
-// JSON channel data
-// {"created_at":"2013-09-18T19:00:11-07:00","entry_id":5,"field1":"10"}
 
 class TwitterModule{
-
-  // Member
-public:
-
 
 private:
 
@@ -36,7 +26,6 @@ private:
   char m_cJsonPacket[JSON_BUFFER_SIZE];
 
   // Methods
-
 public:
   //Constructor
   TwitterModule(int _iButtonPin, int _iLedPin, int _iNetLedPin){
@@ -85,7 +74,6 @@ public:
       Serial.println("ERROR: Couldn't parser the JSON string.");
       return false;
     }
-  //  Serial.println(m_cJsonPacket);    
 
     aJsonObject* oCreated_at = aJson.getObjectItem(jsonObject, "created_at"); // Can get object for "root" but not parsed "jsonObject"
     Serial.println(oCreated_at->valuestring);
@@ -93,12 +81,10 @@ public:
       Serial.println("ERROR: Couldn't find JSON item: \"created_at\"");
       return false;
     }
-  //  Serial.println(oCreated_at->valuestring);
 
     // Check if we have a new Tweet. Compare current with previous datapoint time stamp.
     String sCurTimeStamp(oCreated_at->valuestring);
     
-  //  String sCurTimeStamp = "";
     if( m_sPrevTimeStamp.compareTo(sCurTimeStamp) != 0 )  // 0 == Strings are the same
     {
       Serial.println("GOT WEB TWEET");
